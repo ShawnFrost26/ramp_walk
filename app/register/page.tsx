@@ -256,14 +256,14 @@ function RegistrationContent() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
+    <div className="mx-auto max-w-4xl px-3 sm:px-6 lg:px-8 py-4 sm:py-10">
       {/* Title Header */}
-      <div className="text-center space-y-2 mb-6">
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FCECEF] border border-[#F8B4C0] px-3.5 py-1 text-xs font-bold text-[#900C22]">
-          <Sparkles className="h-3.5 w-3.5" />
+      <div className="text-center space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FCECEF] border border-[#F8B4C0] px-3 py-0.5 text-[11px] sm:text-xs font-bold text-[#900C22]">
+          <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           <span>Official Audition Entry Form</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#900C22] tracking-tight">
+        <h1 className="text-xl sm:text-3xl font-extrabold text-[#900C22] tracking-tight">
           Dharti Aaba Birsa Jayanti 2026 Ramp Walk
         </h1>
         <p className="text-xs sm:text-sm text-slate-600">
@@ -275,7 +275,7 @@ function RegistrationContent() {
       <StepIndicator currentStep={currentStep} totalSteps={STEPS.length} steps={STEPS} />
 
       {/* Form Card Container */}
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xl">
+      <div className="mt-4 sm:mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-8 shadow-lg">
         {serverError && (
           <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-600 flex items-start gap-2.5">
             <AlertCircle className="h-4 w-4 shrink-0 text-red-500 mt-0.5" />

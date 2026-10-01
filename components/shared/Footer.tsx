@@ -3,10 +3,10 @@ import { EVENT_DETAILS } from "@/lib/constants/event";
 
 export function Footer() {
   return (
-    <footer className="w-full bg-[#900C22] text-white py-6 border-t border-[#74091A]">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-3">
+    <footer className="w-full bg-[#900C22] text-white py-4 sm:py-6 border-t border-[#74091A]">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 text-center space-y-2.5">
         {/* Navigation links matching the screenshot */}
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm font-semibold text-white/95">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-1.5 text-[11px] sm:text-sm font-semibold text-white/95">
           <Link href="/terms" className="hover:underline transition-all">
             Terms & Conditions
           </Link>
