@@ -125,7 +125,7 @@ export function Step5Review({
 
       {/* Consent & Declarations */}
       <div className="space-y-3 pt-2">
-        <label
+        <div
           onClick={() => updateFormData({ termsAccepted: !formData.termsAccepted })}
           className="flex items-start gap-3 cursor-pointer group"
         >
@@ -137,14 +137,32 @@ export function Step5Review({
             )}
           </div>
           <span className="text-xs text-slate-300 select-none leading-relaxed">
-            I confirm that the information provided is correct, and I agree to abide by the{" "}
-            <strong className="text-amber-300">Rules & Regulations</strong> of the Dharti Aaba Veer Birsa Munda
-            Jayanti 2026 Ramp Walk Competition.
+            I confirm that the information provided is correct, and I agree to the{" "}
+            <a
+              href="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-amber-400 underline font-semibold hover:text-amber-300"
+            >
+              Terms & Conditions
+            </a>{" "}
+            and{" "}
+            <a
+              href="/refund-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-amber-400 underline font-semibold hover:text-amber-300"
+            >
+              Cancellation & Refund Policy
+            </a>
+            .
           </span>
-        </label>
+        </div>
         {errors.termsAccepted && <p className="text-xs text-red-400">{errors.termsAccepted}</p>}
 
-        <label
+        <div
           onClick={() => updateFormData({ privacyAccepted: !formData.privacyAccepted })}
           className="flex items-start gap-3 cursor-pointer group"
         >
@@ -156,10 +174,19 @@ export function Step5Review({
             )}
           </div>
           <span className="text-xs text-slate-300 select-none leading-relaxed">
-            I agree to the <strong className="text-amber-300">Privacy Policy</strong> and authorize the organizers to
-            use my photograph and audition video for event promotion, broadcast, and delegate identification.
+            I agree to the{" "}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-amber-400 underline font-semibold hover:text-amber-300"
+            >
+              Privacy Policy
+            </a>{" "}
+            and authorize the organizers to use my photograph and audition video for event promotion, broadcast, and delegate identification.
           </span>
-        </label>
+        </div>
         {errors.privacyAccepted && <p className="text-xs text-red-400">{errors.privacyAccepted}</p>}
       </div>
 

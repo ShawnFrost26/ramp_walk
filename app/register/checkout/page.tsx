@@ -307,9 +307,18 @@ function CheckoutContent() {
           )
         )}
 
-        <div className="border-t border-slate-800/80 pt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
-          <ShieldCheck className="h-4 w-4 text-emerald-400" />
-          <span>Razorpay 256-bit Encrypted Checkout • UPI, Cards, NetBanking</span>
+        <div className="border-t border-slate-800/80 pt-4 space-y-2 text-center text-xs text-slate-500">
+          <div className="flex items-center justify-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span>Razorpay 256-bit Encrypted Checkout • UPI, Cards, NetBanking</span>
+          </div>
+          <div className="flex items-center justify-center gap-3 text-[11px] text-slate-400">
+            <a href="/terms" target="_blank" className="hover:underline">Terms & Conditions</a>
+            <span>•</span>
+            <a href="/privacy" target="_blank" className="hover:underline">Privacy Policy</a>
+            <span>•</span>
+            <a href="/refund-policy" target="_blank" className="hover:underline">Cancellation & Refund Policy</a>
+          </div>
         </div>
       </div>
     </div>
