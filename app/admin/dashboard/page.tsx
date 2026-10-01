@@ -13,14 +13,12 @@ import {
   Clock,
   IndianRupee,
   Search,
-  Filter,
   FileSpreadsheet,
   Download,
   Eye,
   LogOut,
   RefreshCw,
   X,
-  AlertCircle,
   Activity,
 } from "lucide-react";
 
@@ -29,7 +27,6 @@ export default function AdminDashboardPage() {
 
   // Metrics & State
   const [metrics, setMetrics] = useState<any>(null);
-  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [pagination, setPagination] = useState({ page: 1, pageSize: 25, total: 0, totalPages: 1 });
   const [isLoading, setIsLoading] = useState(true);
@@ -60,7 +57,6 @@ export default function AdminDashboardPage() {
       }
       const data = await res.json();
       setMetrics(data.metrics);
-      setCategoryCounts(data.categoryCounts || {});
     } catch (err) {
       console.error("Failed to fetch admin metrics:", err);
     }
@@ -101,10 +97,12 @@ export default function AdminDashboardPage() {
   const fetchAuditLogs = async () => {
     try {
       const res = await fetch("/api/admin/audit-logs");
-      const data = await res.json();
-      setAuditLogs(data.logs || []);
+      if (res.ok) {
+        const data = await res.json();
+        setAuditLogs(data.logs || []);
+      }
     } catch (err) {
-      console.error("Failed to load audit logs:", err);
+      console.error("Failed to fetch audit logs:", err);
     }
   };
 
@@ -125,10 +123,9 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/admin/sheets/sync", { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sync failed");
-      setSyncMessage(data.message || `Successfully synced ${data.recordsSynced} records.`);
-      fetchMetrics();
+      setSyncMessage(`Google Sheets synced successfully! ${data.syncedRows} records updated.`);
     } catch (err: any) {
-      setSyncMessage(err.message || "Failed to trigger sheet sync.");
+      setSyncMessage(`Sync Warning: ${err.message}`);
     } finally {
       setIsSyncing(false);
     }
@@ -140,20 +137,20 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090D16] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-white text-slate-800">
       <Navbar />
 
-      <main className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
+      <main className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8 bg-grid-pattern">
         
         {/* Header Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-800 pb-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-md">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-[#1E293B] border border-slate-200 shadow-sm">
               <Shield className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-white">Event Administration Console</h1>
-              <p className="text-xs text-slate-400">
+              <h1 className="text-2xl font-black text-slate-900">Event Administration Console</h1>
+              <p className="text-xs text-slate-500">
                 Dharti Aaba Birsa Jayanti 2026 Ramp Walk • Auditions & Delegates Management
               </p>
             </div>
@@ -164,7 +161,7 @@ export default function AdminDashboardPage() {
               type="button"
               disabled={isSyncing}
               onClick={handleSyncSheets}
-              className="flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-950/40 px-3.5 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-900/60 transition-all"
+              className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition-all shadow-sm"
             >
               {isSyncing ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -177,7 +174,7 @@ export default function AdminDashboardPage() {
             <a
               href="/api/admin/sheets/sync"
               download
-              className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+              className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
             >
               <Download className="h-4 w-4" />
               <span>Export CSV</span>
@@ -186,7 +183,7 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs font-medium text-slate-400 hover:text-red-400 transition-colors"
+              className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:border-red-200 transition-colors shadow-sm"
             >
               <LogOut className="h-4 w-4" />
               <span>Exit</span>
@@ -195,12 +192,12 @@ export default function AdminDashboardPage() {
         </div>
 
         {syncMessage && (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 text-xs text-emerald-300 flex items-center justify-between">
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
               <span>{syncMessage}</span>
             </div>
-            <button onClick={() => setSyncMessage(null)} className="text-emerald-400 hover:text-white">
+            <button onClick={() => setSyncMessage(null)} className="text-emerald-700 hover:text-emerald-950">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -209,39 +206,39 @@ export default function AdminDashboardPage() {
         {/* METRICS CARDS */}
         {metrics && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-slate-800 bg-[#0C1220]/80 p-5 space-y-1">
-              <span className="text-xs text-slate-400 flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-blue-400" />
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-1 shadow-sm">
+              <span className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                <Users className="h-4 w-4 text-blue-600" />
                 <span>Total Applications</span>
               </span>
-              <div className="text-3xl font-black text-white">{metrics.totalRegistrations}</div>
-              <p className="text-[10px] text-slate-500">All draft & confirmed entries</p>
+              <div className="text-3xl font-black text-slate-900">{metrics.totalRegistrations}</div>
+              <p className="text-[10px] text-slate-400">All draft & confirmed entries</p>
             </div>
 
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/10 p-5 space-y-1">
-              <span className="text-xs text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4" />
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 space-y-1 shadow-sm">
+              <span className="text-xs text-emerald-800 flex items-center gap-1.5 font-medium">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                 <span>Confirmed Delegates</span>
               </span>
-              <div className="text-3xl font-black text-emerald-400">{metrics.confirmedCount}</div>
-              <p className="text-[10px] text-emerald-300/60">Verified payment completed</p>
+              <div className="text-3xl font-black text-emerald-700">{metrics.confirmedCount}</div>
+              <p className="text-[10px] text-emerald-600">Verified payment completed</p>
             </div>
 
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-950/10 p-5 space-y-1">
-              <span className="text-xs text-amber-400 flex items-center gap-1.5">
-                <Clock className="h-4 w-4" />
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 space-y-1 shadow-sm">
+              <span className="text-xs text-amber-800 flex items-center gap-1.5 font-medium">
+                <Clock className="h-4 w-4 text-amber-600" />
                 <span>Pending Payment</span>
               </span>
-              <div className="text-3xl font-black text-amber-400">{metrics.pendingCount}</div>
-              <p className="text-[10px] text-amber-300/60">Checkout in progress / draft</p>
+              <div className="text-3xl font-black text-amber-700">{metrics.pendingCount}</div>
+              <p className="text-[10px] text-amber-600">Checkout in progress / draft</p>
             </div>
 
-            <div className="rounded-2xl border border-slate-800 bg-[#0C1220]/80 p-5 space-y-1">
-              <span className="text-xs text-slate-400 flex items-center gap-1.5">
-                <IndianRupee className="h-4 w-4 text-emerald-400" />
+            <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-5 space-y-1 shadow-sm">
+              <span className="text-xs text-[#900C22] flex items-center gap-1.5 font-medium">
+                <IndianRupee className="h-4 w-4 text-[#900C22]" />
                 <span>Collected Revenue</span>
               </span>
-              <div className="text-3xl font-black text-amber-400">
+              <div className="text-3xl font-black text-[#900C22]">
                 {formatCurrency(metrics.totalRevenue)}
               </div>
               <p className="text-[10px] text-slate-500">₹{EVENT_DETAILS.registrationFee} per delegate</p>
@@ -250,14 +247,14 @@ export default function AdminDashboardPage() {
         )}
 
         {/* NAVIGATION TABS */}
-        <div className="flex items-center gap-3 border-b border-slate-800 pb-2">
+        <div className="flex items-center gap-3 border-b border-slate-200 pb-2">
           <button
             type="button"
             onClick={() => setActiveTab("participants")}
             className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all ${
               activeTab === "participants"
-                ? "bg-amber-500 text-slate-950"
-                : "text-slate-400 hover:text-white hover:bg-slate-900"
+                ? "bg-[#1E293B] text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             Participants List
@@ -271,8 +268,8 @@ export default function AdminDashboardPage() {
             }}
             className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all ${
               activeTab === "audit"
-                ? "bg-amber-500 text-slate-950"
-                : "text-slate-400 hover:text-white hover:bg-slate-900"
+                ? "bg-[#1E293B] text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             Audit Log Trail
@@ -281,18 +278,18 @@ export default function AdminDashboardPage() {
 
         {/* TAB 1: PARTICIPANTS DIRECTORY */}
         {activeTab === "participants" && (
-          <div className="rounded-2xl border border-slate-800 bg-[#0C1220]/80 p-6 backdrop-blur-xl shadow-xl space-y-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl space-y-6">
             
             {/* Search & Filter Bar */}
             <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
               <div className="sm:col-span-5 relative">
-                <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-500" />
+                <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Search name, phone, email, or TH26- number..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-900/80 pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+                  className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1E293B]"
                 />
               </div>
 
@@ -300,7 +297,7 @@ export default function AdminDashboardPage() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#1E293B]"
                 >
                   <option value="">All Categories</option>
                   {COMPETITION_CATEGORIES.map((c) => (
@@ -315,7 +312,7 @@ export default function AdminDashboardPage() {
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#1E293B]"
                 >
                   <option value="">All Statuses</option>
                   <option value="CONFIRMED">CONFIRMED</option>
@@ -328,7 +325,7 @@ export default function AdminDashboardPage() {
               <div className="sm:col-span-2 flex gap-2">
                 <button
                   type="submit"
-                  className="btn-primary-gold w-full rounded-xl py-2 text-xs font-bold shadow-md"
+                  className="w-full rounded-xl py-2 text-xs font-bold bg-[#1E293B] hover:bg-[#0F172A] text-white shadow-md transition-all"
                 >
                   Filter
                 </button>
@@ -336,9 +333,9 @@ export default function AdminDashboardPage() {
             </form>
 
             {/* Directory Table */}
-            <div className="overflow-x-auto rounded-xl border border-slate-800">
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-900/90 text-slate-400 border-b border-slate-800 uppercase tracking-wider font-semibold">
+                <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase tracking-wider font-semibold">
                   <tr>
                     <th className="py-3 px-4">Reg No</th>
                     <th className="py-3 px-4">Participant</th>
@@ -349,48 +346,48 @@ export default function AdminDashboardPage() {
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-100">
                   {isLoading ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-500">
-                        <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-amber-500" />
+                      <td colSpan={7} className="py-12 text-center text-slate-400">
+                        <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-[#900C22]" />
                         Loading participant records...
                       </td>
                     </tr>
                   ) : registrations.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-500">
+                      <td colSpan={7} className="py-12 text-center text-slate-400">
                         No registrations found matching your query.
                       </td>
                     </tr>
                   ) : (
                     registrations.map((reg) => (
-                      <tr key={reg.id} className="hover:bg-slate-900/40 transition-colors">
-                        <td className="py-3 px-4 font-mono font-bold text-amber-400">
+                      <tr key={reg.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-3 px-4 font-mono font-bold text-[#900C22]">
                           {reg.registration_number || "—"}
                         </td>
                         <td className="py-3 px-4">
-                          <div className="font-bold text-white">{reg.full_name}</div>
+                          <div className="font-bold text-slate-900">{reg.full_name}</div>
                           <div className="text-[11px] text-slate-400">
                             {reg.gender} • {reg.tribal_community || "Indigenous"}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-slate-300">{reg.category}</td>
+                        <td className="py-3 px-4 text-slate-700">{reg.category}</td>
                         <td className="py-3 px-4">
-                          <div className="text-white">{reg.mobile_number}</div>
+                          <div className="text-slate-900">{reg.mobile_number}</div>
                           <div className="text-[11px] text-slate-400 truncate max-w-[150px]">{reg.email}</div>
                         </td>
-                        <td className="py-3 px-4 text-slate-300">
+                        <td className="py-3 px-4 text-slate-700">
                           {reg.city_or_village}, {reg.district}
                         </td>
                         <td className="py-3 px-4">
                           <span
                             className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
                               reg.registration_status === "CONFIRMED"
-                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                                 : reg.registration_status === "PAYMENT_PENDING"
-                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                                : "bg-slate-800 text-slate-400"
+                                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                : "bg-slate-100 text-slate-500"
                             }`}
                           >
                             {reg.registration_status}
@@ -400,9 +397,9 @@ export default function AdminDashboardPage() {
                           <button
                             type="button"
                             onClick={() => setInspectRecord(reg)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-200 hover:border-amber-500/50 hover:text-white transition-colors"
+                            className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-[#1E293B] hover:text-[#1E293B] transition-colors shadow-sm"
                           >
-                            <Eye className="h-3.5 w-3.5 text-amber-400" />
+                            <Eye className="h-3.5 w-3.5 text-[#1E293B]" />
                             <span>View</span>
                           </button>
                         </td>
@@ -414,7 +411,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Pagination Controls */}
-            <div className="flex items-center justify-between text-xs text-slate-400 pt-2">
+            <div className="flex items-center justify-between text-xs text-slate-500 pt-2">
               <div>
                 Showing page <strong>{pagination.page}</strong> of <strong>{pagination.totalPages || 1}</strong> (Total {pagination.total} records)
               </div>
@@ -422,14 +419,14 @@ export default function AdminDashboardPage() {
                 <button
                   disabled={pagination.page <= 1}
                   onClick={() => fetchRegistrations(pagination.page - 1)}
-                  className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 disabled:opacity-30"
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-slate-700 disabled:opacity-40 hover:bg-slate-50"
                 >
                   Previous
                 </button>
                 <button
                   disabled={pagination.page >= pagination.totalPages}
                   onClick={() => fetchRegistrations(pagination.page + 1)}
-                  className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 disabled:opacity-30"
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-slate-700 disabled:opacity-40 hover:bg-slate-50"
                 >
                   Next
                 </button>
@@ -441,25 +438,25 @@ export default function AdminDashboardPage() {
 
         {/* TAB 2: AUDIT LOGS */}
         {activeTab === "audit" && (
-          <div className="rounded-2xl border border-slate-800 bg-[#0C1220]/80 p-6 backdrop-blur-xl shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Activity className="h-4 w-4 text-amber-400" />
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Activity className="h-4 w-4 text-[#900C22]" />
               <span>System & Operator Audit Trail</span>
             </h3>
 
-            <div className="divide-y divide-slate-800 text-xs">
+            <div className="divide-y divide-slate-100 text-xs">
               {auditLogs.length === 0 ? (
-                <p className="py-8 text-center text-slate-500">No audit logs recorded yet.</p>
+                <p className="py-8 text-center text-slate-400">No audit logs recorded yet.</p>
               ) : (
                 auditLogs.map((log) => (
                   <div key={log.id} className="py-3 flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <span className="font-bold text-amber-400">{log.action}</span>
-                      <p className="text-[11px] text-slate-400">
+                      <span className="font-bold text-[#900C22]">{log.action}</span>
+                      <p className="text-[11px] text-slate-500">
                         Actor: {log.actor_type} ({log.actor_identifier || "System Engine"})
                       </p>
                     </div>
-                    <span className="text-[11px] text-slate-500 font-mono">
+                    <span className="text-[11px] text-slate-400 font-mono">
                       {formatDate(log.created_at)}
                     </span>
                   </div>
@@ -473,18 +470,18 @@ export default function AdminDashboardPage() {
 
       {/* INSPECT PARTICIPANT MODAL */}
       {inspectRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl rounded-3xl border border-amber-500/30 bg-[#0F172A] p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div>
-                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest font-bold">
+                <span className="text-[10px] font-mono text-[#900C22] uppercase tracking-widest font-bold">
                   {inspectRecord.registration_number || "Draft Entry"}
                 </span>
-                <h3 className="text-xl font-bold text-white">{inspectRecord.full_name}</h3>
+                <h3 className="text-xl font-bold text-slate-900">{inspectRecord.full_name}</h3>
               </div>
               <button
                 onClick={() => setInspectRecord(null)}
-                className="rounded-full bg-slate-800 p-1.5 text-slate-400 hover:text-white"
+                className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:text-slate-800"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -492,48 +489,48 @@ export default function AdminDashboardPage() {
 
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <span className="text-slate-500">Category:</span>
-                <p className="font-semibold text-amber-400 mt-0.5">{inspectRecord.category}</p>
+                <span className="text-slate-400 font-medium">Category:</span>
+                <p className="font-semibold text-[#900C22] mt-0.5">{inspectRecord.category}</p>
               </div>
               <div>
-                <span className="text-slate-500">Status:</span>
-                <p className="font-semibold text-emerald-400 mt-0.5">{inspectRecord.registration_status}</p>
+                <span className="text-slate-400 font-medium">Status:</span>
+                <p className="font-semibold text-emerald-700 mt-0.5">{inspectRecord.registration_status}</p>
               </div>
               <div>
-                <span className="text-slate-500">Contact:</span>
-                <p className="text-white mt-0.5">{inspectRecord.mobile_number}</p>
-                <p className="text-slate-400 truncate">{inspectRecord.email}</p>
+                <span className="text-slate-400 font-medium">Contact:</span>
+                <p className="text-slate-800 mt-0.5">{inspectRecord.mobile_number}</p>
+                <p className="text-slate-500 truncate">{inspectRecord.email}</p>
               </div>
               <div>
-                <span className="text-slate-500">Guardian & Community:</span>
-                <p className="text-white mt-0.5">{inspectRecord.guardian_name}</p>
-                <p className="text-amber-300">{inspectRecord.tribal_community || "Tribal"}</p>
+                <span className="text-slate-400 font-medium">Guardian & Community:</span>
+                <p className="text-slate-800 mt-0.5">{inspectRecord.guardian_name}</p>
+                <p className="text-[#900C22] font-semibold">{inspectRecord.tribal_community || "Tribal"}</p>
               </div>
               <div className="col-span-2">
-                <span className="text-slate-500">Full Address:</span>
-                <p className="text-slate-200 mt-0.5">{inspectRecord.full_address}</p>
-                <p className="text-slate-400">
+                <span className="text-slate-400 font-medium">Full Address:</span>
+                <p className="text-slate-700 mt-0.5">{inspectRecord.full_address}</p>
+                <p className="text-slate-500">
                   {inspectRecord.city_or_village}, {inspectRecord.district}, {inspectRecord.state} - {inspectRecord.pincode}
                 </p>
               </div>
               {(inspectRecord.attire_name || inspectRecord.attire_representation) && (
-                <div className="col-span-2 border-t border-slate-800 pt-3">
-                  <span className="text-slate-500">Traditional Attire:</span>
-                  <p className="font-semibold text-white mt-0.5">
+                <div className="col-span-2 border-t border-slate-100 pt-3">
+                  <span className="text-slate-400 font-medium">Traditional Attire:</span>
+                  <p className="font-semibold text-slate-900 mt-0.5">
                     {inspectRecord.attire_name} ({inspectRecord.attire_representation})
                   </p>
                   {inspectRecord.attire_description && (
-                    <p className="text-slate-400 text-[11px] mt-1 italic">&ldquo;{inspectRecord.attire_description}&rdquo;</p>
+                    <p className="text-slate-500 text-[11px] mt-1 italic">&ldquo;{inspectRecord.attire_description}&rdquo;</p>
                   )}
                 </div>
               )}
             </div>
 
-            <div className="border-t border-slate-800 pt-4 flex justify-end">
+            <div className="border-t border-slate-200 pt-4 flex justify-end">
               <button
                 type="button"
                 onClick={() => setInspectRecord(null)}
-                className="rounded-xl border border-slate-700 bg-slate-800 px-5 py-2 text-xs font-semibold text-slate-200 hover:text-white"
+                className="rounded-xl border border-slate-300 bg-slate-100 px-5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200"
               >
                 Close
               </button>

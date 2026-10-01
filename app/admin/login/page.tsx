@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { Shield, Lock, User, AlertCircle, RefreshCw, ArrowRight } from "lucide-react";
@@ -41,60 +40,60 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090D16] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-white text-slate-800">
       <Navbar />
 
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 bg-grid-pattern">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-lg">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-[#1E293B] border border-slate-200 shadow-sm">
               <Shield className="h-6 w-6" />
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               Organizer Admin Console
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Authorized event officials & secretariat login.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-[#0C1220]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-5">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xl space-y-5">
             {error && (
-              <div className="rounded-xl border border-red-500/30 bg-red-950/30 p-4 text-xs text-red-300 flex items-start gap-2.5">
-                <AlertCircle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-600 flex items-start gap-2.5">
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-500 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-300">Admin Username</label>
+                <label className="block text-xs font-semibold text-slate-700">Admin Username</label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-500" />
+                  <User className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
                   <input
                     type="text"
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/80 pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20"
+                    className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-[#1E293B] focus:ring-2 focus:ring-[#1E293B]/20"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-300">Admin Secret Key</label>
+                <label className="block text-xs font-semibold text-slate-700">Admin Secret Key</label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-500" />
+                  <Lock className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
                   <input
                     type="password"
                     required
                     placeholder="Enter admin secret key"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/80 pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20"
+                    className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-[#1E293B] focus:ring-2 focus:ring-[#1E293B]/20"
                   />
                 </div>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-slate-400">
                   Configured in .env (ADMIN_SECRET_KEY). Default: birsa_aaba_2026_super_admin_secret_token
                 </p>
               </div>
@@ -102,7 +101,7 @@ export default function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn-primary-gold w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold shadow-xl disabled:opacity-50 mt-2"
+                className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold bg-[#1E293B] hover:bg-[#0F172A] text-white shadow-md transition-all disabled:opacity-50 mt-2"
               >
                 {isLoading ? (
                   <>

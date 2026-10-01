@@ -3,7 +3,6 @@
 import { useState, useRef } from "react";
 import { EVENT_DETAILS } from "@/lib/constants/event";
 import { Camera, Upload, AlertCircle, CheckCircle2, X, RefreshCw } from "lucide-react";
-import Image from "next/image";
 
 interface Step4Props {
   formData: any;
@@ -85,25 +84,25 @@ export function Step4Photo({ formData, updateFormData, errors }: Step4Props) {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-800 pb-4">
-        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-          <Camera className="h-5 w-5 text-amber-400" />
+      <div className="border-b border-slate-200 pb-4">
+        <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <Camera className="h-5 w-5 text-[#900C22]" />
           <span>Section IV: Participant Photograph</span>
         </h3>
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-slate-500 mt-1">
           Upload a clear portrait or passport-style photograph for your Delegate Pass and jury evaluation.
         </p>
       </div>
 
       {/* Recommended Guidelines Notice */}
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs text-amber-200/90 space-y-1">
-        <div className="font-semibold text-amber-300 flex items-center gap-1.5">
+      <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 text-xs text-slate-700 space-y-1">
+        <div className="font-semibold text-[#900C22] flex items-center gap-1.5">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>Photograph Guidelines:</span>
         </div>
-        <ul className="list-disc list-inside space-y-0.5 text-slate-300 pl-1">
+        <ul className="list-disc list-inside space-y-0.5 text-slate-600 pl-1">
           <li><strong>File Size Limit:</strong> Maximum 1 MB (Strictly enforced).</li>
-          <li><strong>Recommended Dimensions:</strong> Standard portrait ratio (3:4) or passport size (3.5cm x 4.5cm). <em>(Not technically blocked)</em>.</li>
+          <li><strong>Recommended Dimensions:</strong> Standard portrait ratio (3:4) or passport size (3.5cm x 4.5cm).</li>
           <li><strong>Format:</strong> JPEG, PNG, or WebP.</li>
           <li>Photo must show your face clearly with good lighting.</li>
         </ul>
@@ -112,7 +111,7 @@ export function Step4Photo({ formData, updateFormData, errors }: Step4Props) {
       {/* Upload Dropzone / Preview Area */}
       <div className="flex flex-col sm:flex-row items-center gap-6">
         {formData.photoPreviewUrl ? (
-          <div className="relative group w-44 h-56 rounded-2xl overflow-hidden border-2 border-amber-500 shadow-xl bg-slate-900 shrink-0">
+          <div className="relative group w-44 h-56 rounded-2xl overflow-hidden border-2 border-[#900C22] shadow-md bg-slate-100 shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={formData.photoPreviewUrl}
@@ -120,7 +119,7 @@ export function Step4Photo({ formData, updateFormData, errors }: Step4Props) {
               className="w-full h-full object-cover"
             />
             {isUploading && (
-              <div className="absolute inset-0 bg-slate-950/70 flex flex-col items-center justify-center gap-2 text-xs text-amber-400">
+              <div className="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center gap-2 text-xs text-white">
                 <RefreshCw className="h-5 w-5 animate-spin" />
                 <span>Uploading...</span>
               </div>
@@ -145,14 +144,14 @@ export function Step4Photo({ formData, updateFormData, errors }: Step4Props) {
             onClick={() => fileInputRef.current?.click()}
             className={`w-full sm:w-64 h-56 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all ${
               dragActive
-                ? "border-amber-400 bg-amber-500/10"
-                : "border-slate-700 bg-slate-900/40 hover:border-amber-500/50 hover:bg-slate-900/80"
+                ? "border-[#900C22] bg-rose-50"
+                : "border-slate-300 bg-slate-50 hover:border-[#900C22]/60 hover:bg-white"
             }`}
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800 text-amber-400 mb-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white border border-slate-200 text-[#900C22] mb-3 shadow-sm">
               <Upload className="h-6 w-6" />
             </div>
-            <p className="text-xs font-semibold text-white">Click or drag & drop</p>
+            <p className="text-xs font-semibold text-slate-800">Click or drag & drop</p>
             <p className="text-[11px] text-slate-400 mt-1">Portrait photo (Max 1 MB)</p>
           </div>
         )}
@@ -173,20 +172,20 @@ export function Step4Photo({ formData, updateFormData, errors }: Step4Props) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-2.5 text-xs font-semibold text-slate-200 hover:border-amber-500/40 hover:text-white transition-all"
+            className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:border-[#900C22] hover:text-[#900C22] shadow-sm transition-all"
           >
             {formData.photoPreviewUrl ? "Choose Different Photo" : "Select Photo from Device"}
           </button>
 
           {formData.photoPreviewUrl && !uploadError && (
-            <div className="flex items-center gap-1.5 text-xs text-emerald-400 justify-center sm:justify-start">
+            <div className="flex items-center gap-1.5 text-xs text-emerald-600 justify-center sm:justify-start">
               <CheckCircle2 className="h-4 w-4" />
               <span>Photograph ready for registration</span>
             </div>
           )}
 
           {uploadError && (
-            <p className="text-xs text-red-400">{uploadError}</p>
+            <p className="text-xs text-red-500">{uploadError}</p>
           )}
         </div>
       </div>

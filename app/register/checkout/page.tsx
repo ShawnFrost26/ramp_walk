@@ -202,67 +202,67 @@ function CheckoutContent() {
       </button>
 
       {/* Main Payment Container */}
-      <div className="rounded-2xl border border-slate-800 bg-[#0C1220]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-6">
-        <div className="text-center space-y-2 border-b border-slate-800/80 pb-6">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-md">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xl space-y-6">
+        <div className="text-center space-y-2 border-b border-slate-200 pb-6">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-[#900C22] border border-rose-200 shadow-sm">
             <CreditCard className="h-6 w-6" />
           </div>
-          <h2 className="text-2xl font-extrabold text-white tracking-tight">
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             Complete Your Registration
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Dharti Aaba Birsa Jayanti 2026 Ramp Walk Audition
           </p>
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-500/30 bg-red-950/30 p-4 text-xs text-red-300 flex items-start gap-2.5">
-            <AlertCircle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-600 flex items-start gap-2.5">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-500 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {isLoading ? (
-          <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <RefreshCw className="h-6 w-6 animate-spin text-amber-500" />
+          <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-500">
+            <RefreshCw className="h-6 w-6 animate-spin text-[#900C22]" />
             <p className="text-xs font-medium">Securing Razorpay Order...</p>
           </div>
         ) : (
           orderData && (
             <div className="space-y-6">
               {/* Participant Summary */}
-              <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4 space-y-2 text-xs">
-                <div className="flex justify-between text-slate-400">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2 text-xs">
+                <div className="flex justify-between text-slate-500">
                   <span>Participant:</span>
-                  <span className="font-semibold text-white">{orderData.participant?.name}</span>
+                  <span className="font-semibold text-slate-900">{orderData.participant?.name}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-slate-500">
                   <span>Category:</span>
-                  <span className="font-semibold text-amber-400">{orderData.participant?.category}</span>
+                  <span className="font-semibold text-[#900C22]">{orderData.participant?.category}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-slate-500">
                   <span>Contact:</span>
-                  <span className="text-slate-300">{orderData.participant?.mobile}</span>
+                  <span className="text-slate-800">{orderData.participant?.mobile}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-slate-500">
                   <span>Email:</span>
-                  <span className="text-slate-300">{orderData.participant?.email}</span>
+                  <span className="text-slate-800">{orderData.participant?.email}</span>
                 </div>
               </div>
 
               {/* Total Fee Box */}
-              <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-5 flex items-center justify-between">
+              <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-5 flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-semibold text-amber-300 uppercase tracking-wider block">
+                  <span className="text-xs font-bold text-[#900C22] uppercase tracking-wider block">
                     Total Amount Due
                   </span>
-                  <span className="text-xs text-slate-400">Inclusive of all taxes & delegate pass</span>
+                  <span className="text-xs text-slate-500">Inclusive of all taxes & delegate pass</span>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-black text-amber-400">
+                  <div className="text-3xl font-black text-[#900C22]">
                     {formatCurrency(EVENT_DETAILS.registrationFee)}
                   </div>
-                  <span className="text-[10px] text-emerald-400 font-medium flex items-center justify-end gap-1 mt-0.5">
+                  <span className="text-[10px] text-emerald-600 font-medium flex items-center justify-end gap-1 mt-0.5">
                     <CheckCircle2 className="h-3 w-3" /> Server Verified Fee
                   </span>
                 </div>
@@ -274,7 +274,7 @@ function CheckoutContent() {
                   type="button"
                   disabled={isProcessing}
                   onClick={launchRazorpayCheckout}
-                  className="btn-primary-gold w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold shadow-xl disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold bg-[#900C22] hover:bg-[#74091A] text-white shadow-lg transition-all disabled:opacity-50"
                 >
                   {isProcessing ? (
                     <>
@@ -294,11 +294,11 @@ function CheckoutContent() {
                   <button
                     type="button"
                     onClick={handleSimulatePayment}
-                    className="text-xs text-amber-400/80 hover:text-amber-300 underline font-medium"
+                    className="text-xs text-[#900C22] hover:text-[#74091A] underline font-medium"
                   >
                     ⚡ Test Mode: Simulate Instant Successful Payment
                   </button>
-                  <p className="text-[10px] text-slate-500 mt-1">
+                  <p className="text-[10px] text-slate-400 mt-1">
                     Use to complete end-to-end flow without requiring live gateway credentials.
                   </p>
                 </div>
@@ -307,9 +307,9 @@ function CheckoutContent() {
           )
         )}
 
-        <div className="border-t border-slate-800/80 pt-4 space-y-2 text-center text-xs text-slate-500">
+        <div className="border-t border-slate-200 pt-4 space-y-2 text-center text-xs text-slate-500">
           <div className="flex items-center justify-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <ShieldCheck className="h-4 w-4 text-emerald-600" />
             <span>Razorpay 256-bit Encrypted Checkout • UPI, Cards, NetBanking</span>
           </div>
           <div className="flex items-center justify-center gap-3 text-[11px] text-slate-400">
@@ -327,10 +327,10 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#090D16] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-white text-slate-800">
       <Navbar />
-      <main className="flex-1">
-        <Suspense fallback={<div className="p-12 text-center text-slate-400">Loading Checkout...</div>}>
+      <main className="flex-1 bg-grid-pattern">
+        <Suspense fallback={<div className="p-12 text-center text-slate-500">Loading Checkout...</div>}>
           <CheckoutContent />
         </Suspense>
       </main>

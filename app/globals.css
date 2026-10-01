@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090d16;
-  --foreground: #f8fafc;
-  --tribal-gold: #f59e0b;
-  --tribal-ochre: #d97706;
-  --tribal-forest: #064e3b;
-  --tribal-emerald: #10b981;
-  --tribal-card: rgba(15, 23, 42, 0.75);
-  --tribal-border: rgba(245, 158, 11, 0.2);
+  --background: #ffffff;
+  --foreground: #1f2937;
+  --primary-maroon: #900C22;
+  --primary-maroon-hover: #74091A;
+  --primary-maroon-light: #FFF5F6;
+  --primary-maroon-border: #FCD5DC;
+  --accent-ochre: #A26715;
+  --accent-ochre-hover: #8B5711;
+  --accent-navy: #1E293B;
+  --accent-navy-hover: #0F172A;
+  --card-bg: #ffffff;
+  --card-border: #E5E7EB;
 }
 
 @theme inline {
@@ -19,59 +23,91 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: #ffffff;
+  color: #1f2937;
   font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
 }
 
-/* Glassmorphism & Cultural Decorative Borders */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+/* Subtle micro-grid pattern matching design */
+.bg-grid-pattern {
+  background-color: #ffffff;
+  background-image: 
+    linear-gradient(to right, rgba(144, 12, 34, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(144, 12, 34, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
-.glass-card-hover {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+/* Primary Brand Crimson Buttons */
+.btn-primary-gold,
+.btn-primary-maroon {
+  background-color: #900C22;
+  color: #ffffff;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px 0 rgba(144, 12, 34, 0.25);
 }
 
-.glass-card-hover:hover {
-  transform: translateY(-2px);
-  border-color: rgba(245, 158, 11, 0.45);
-  box-shadow: 0 12px 30px -10px rgba(245, 158, 11, 0.15);
+.btn-primary-gold:hover,
+.btn-primary-maroon:hover {
+  background-color: #74091A;
+  box-shadow: 0 6px 20px rgba(144, 12, 34, 0.35);
+  transform: translateY(-1px);
 }
 
-/* Tribal Gold Glow Accents */
-.text-gold-gradient {
-  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
+.btn-primary-gold:active,
+.btn-primary-maroon:active {
+  transform: translateY(0);
+}
+
+/* Ochre / Delegate Button */
+.btn-accent-ochre {
+  background-color: #A26715;
+  color: #ffffff;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px 0 rgba(162, 103, 21, 0.25);
+}
+
+.btn-accent-ochre:hover {
+  background-color: #8B5711;
+  box-shadow: 0 6px 18px rgba(162, 103, 21, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Navy / Admin Button */
+.btn-accent-navy {
+  background-color: #1E293B;
+  color: #ffffff;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px 0 rgba(30, 41, 59, 0.25);
+}
+
+.btn-accent-navy:hover {
+  background-color: #0F172A;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Text Gradient */
+.text-gold-gradient,
+.text-maroon-gradient {
+  background: linear-gradient(135deg, #900C22 0%, #B81D39 50%, #74091A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.bg-tribal-gradient {
-  background: linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(6, 78, 59, 0.25) 100%);
+/* Card hover styles */
+.light-card-hover {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn-primary-gold {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: #0f172a;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 14px 0 rgba(217, 119, 6, 0.39);
-}
-
-.btn-primary-gold:hover {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
-  transform: translateY(-1px);
-}
-
-.btn-primary-gold:active {
-  transform: translateY(0);
+.light-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(144, 12, 34, 0.3);
+  box-shadow: 0 12px 24px -10px rgba(144, 12, 34, 0.12);
 }
 
 /* Custom Scrollbars */
@@ -81,14 +117,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #f8fafc;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d97706;
+  background: #900C22;
 }
