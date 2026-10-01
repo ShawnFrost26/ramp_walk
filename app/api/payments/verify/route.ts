@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { EVENT_DETAILS } from "@/lib/constants/event";
 import { verifyPaymentSignature } from "@/lib/razorpay/client";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
         p_registration_id: registrationId,
         p_razorpay_order_id: razorpayOrderId,
         p_razorpay_payment_id: razorpayPaymentId,
-        p_amount: 50000,
+        p_amount: EVENT_DETAILS.registrationFeePaise,
         p_raw_metadata: { source: "client_checkout_verification" },
       }
     );

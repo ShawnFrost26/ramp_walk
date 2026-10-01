@@ -1,11 +1,13 @@
+const configuredFee = Number(process.env.NEXT_PUBLIC_REGISTRATION_FEE) || 500;
+
 export const EVENT_DETAILS = {
   name: "Dharti Aaba Veer Birsa Munda Jayanti 2026",
   subTitle: "Grand Ramp Walk Competition & Audition Promotion",
   tagline: "Celebrating Tribal Heritage, Pride, Elegance & Culture",
   year: 2026,
   edition: "Annual Commemorative Edition",
-  registrationFee: 500, // INR
-  registrationFeePaise: 50000,
+  registrationFee: configuredFee, // INR
+  registrationFeePaise: configuredFee * 100, // Amount in paise for Razorpay
   currency: "INR",
   dates: {
     audition: "October 2026",

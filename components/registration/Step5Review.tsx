@@ -198,7 +198,9 @@ export function Step5Review({
           onClick={onProceedToPayment}
           className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-base font-bold bg-[#900C22] hover:bg-[#74091A] text-white shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span>{isSubmitting ? "Initiating Secure Checkout..." : "Proceed to Payment (₹500)"}</span>
+          <span>
+            {isSubmitting ? "Initiating Secure Checkout..." : `Proceed to Payment (₹${EVENT_DETAILS.registrationFee})`}
+          </span>
           <ArrowRight className="h-5 w-5" />
         </button>
       </div>
