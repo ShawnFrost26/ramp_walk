@@ -49,7 +49,7 @@ export async function PATCH(
       const supabase = getSupabaseServerClient();
       await supabase.from("audit_logs").insert({
         action: `ADMIN_ACCESS_${status}`,
-        actor_type: "SUPER_ADMIN",
+        actor_type: "ADMIN",
         actor_identifier: "Main Creator Admin",
         metadata: {
           admin_user_id: id,

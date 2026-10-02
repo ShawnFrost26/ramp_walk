@@ -309,6 +309,33 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
+        {/* PENDING ADMIN ACCESS REQUESTS ALERT BANNER */}
+        {pendingAdminCount > 0 && adminSession?.isSuperAdmin && (
+          <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
+                <Crown className="h-5 w-5 text-amber-700" />
+              </div>
+              <div>
+                <p className="font-bold text-sm text-amber-950">
+                  {pendingAdminCount} Admin Access Request{pendingAdminCount > 1 ? "s" : ""} Pending Approval
+                </p>
+                <p className="text-amber-800 text-[11px] mt-0.5">
+                  Event officials have requested secretariat access. Review and approve or reject their requests.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("admin_requests")}
+              className="w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 shadow-sm transition-all text-xs"
+            >
+              <span>View & Approve Requests</span>
+              <span>→</span>
+            </button>
+          </div>
+        )}
+
         {/* METRICS CARDS */}
         {metrics && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

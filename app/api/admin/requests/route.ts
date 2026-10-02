@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       const supabase = getSupabaseServerClient();
       await supabase.from("audit_logs").insert({
         action: "ADMIN_ACCESS_REQUESTED",
-        actor_type: "REQUESTER_ADMIN",
+        actor_type: "ADMIN",
         actor_identifier: validated.email,
         metadata: {
           name: validated.name,
