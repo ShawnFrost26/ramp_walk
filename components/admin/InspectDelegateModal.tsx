@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   X,
   Edit3,
@@ -20,7 +20,8 @@ import {
   Check,
   RefreshCw,
   ExternalLink,
-  ChevronRight,
+  Upload,
+  Camera,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import {
@@ -45,18 +46,24 @@ export function InspectDelegateModal({
   const [isEditMode, setIsEditMode] = useState(false);
   const [inspectData, setInspectData] = useState<any>(record);
   const [paymentData, setPaymentData] = useState<any>(null);
-  const [photoUrl, setPhotoUrl] = useState<string | null>(record.photo_storage_path || null);
+
+  // Reliable photo URL - defaults to internal photo proxy endpoint
+  const [photoUrl, setPhotoUrl] = useState<string>(
+    record.id ? `/api/admin/registrations/${record.id}/photo` : ""
+  );
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
 
   // Edit form state
   const [formData, setFormData] = useState<any>({ ...record });
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // Photo rendering state
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Copy helper
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -106,6 +113,46 @@ export function InspectDelegateModal({
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
+  // Admin Photo Upload / Replacement handler
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > EVENT_DETAILS.maxPhotoSizeBytes) {
+      setSaveError(`File size exceeds 5 MB. Please select a photo under 5 MB.`);
+      return;
+    }
+
+    try {
+      setIsUploadingPhoto(true);
+      setSaveError(null);
+
+      const uploadData = new FormData();
+      uploadData.append("file", file);
+
+      const res = await fetch("/api/uploads/photo", {
+        method: "POST",
+        body: uploadData,
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Photo upload failed");
+
+      const newPath = json.storagePath;
+      const preview = json.publicUrl || URL.createObjectURL(file);
+
+      handleInputChange("photo_storage_path", newPath);
+      setPhotoUrl(preview);
+      setImgError(false);
+      setImgLoaded(true);
+    } catch (err: any) {
+      console.error(err);
+      setSaveError(err.message || "Failed to upload new photo");
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -126,12 +173,17 @@ export function InspectDelegateModal({
 
       setInspectData(data.registration);
       setFormData({ ...data.registration });
-      setSaveSuccess("Delegate details updated successfully!");
+      setSaveSuccess("Delegate details updated and synchronized across all tables and Google Sheets!");
       setIsEditMode(false);
       onRecordUpdated(data.registration);
 
-      // Auto-clear success notification after 4s
-      setTimeout(() => setSaveSuccess(null), 4000);
+      // Trigger background Google Sheet Sync so remote sheets are updated immediately
+      fetch("/api/admin/sheets/sync", { method: "POST" }).catch((err) =>
+        console.warn("Background sheet sync trigger:", err)
+      );
+
+      // Auto-clear success notification after 5s
+      setTimeout(() => setSaveSuccess(null), 5000);
     } catch (err: any) {
       console.error("Save error:", err);
       setSaveError(err.message || "Failed to save delegate changes");
@@ -140,8 +192,8 @@ export function InspectDelegateModal({
     }
   };
 
-  const displayPhoto = photoUrl || inspectData.photoPreviewUrl || inspectData.photo_storage_path;
   const isConfirmed = inspectData.registration_status === "CONFIRMED";
+  const displayPhoto = photoUrl || `/api/admin/registrations/${inspectData.id}/photo`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 backdrop-blur-sm">
@@ -231,16 +283,57 @@ export function InspectDelegateModal({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
           {/* ═════════════════════════════════════════════════════════ */}
-          {/* EDIT MODE FORM */}
+          {/* EDIT MODE FORM (ADMIN EDIT & SYNC)                      */}
           {/* ═════════════════════════════════════════════════════════ */}
           {isEditMode ? (
             <form onSubmit={handleSave} className="space-y-6 text-xs">
-              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 flex items-center justify-between">
+              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-amber-900 font-semibold">
                   <Edit3 className="h-4 w-4 text-[#900C22]" />
-                  <span>Admin Edit Mode: Modify participant records and save changes.</span>
+                  <span>Admin Edit Mode: Modify information below. Saved changes will sync across all tables & Google Sheets.</span>
                 </div>
-                <span className="text-[11px] text-amber-800 font-medium">Changes will be logged in audit trail</span>
+                <span className="text-[11px] text-amber-800 font-medium">Logged in Audit Trail</span>
+              </div>
+
+              {/* Photo Upload & Replacement in Edit Mode */}
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 flex flex-col sm:flex-row items-center gap-5">
+                <div className="relative w-24 h-32 rounded-xl overflow-hidden border-2 border-[#900C22] bg-white shadow-md shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={displayPhoto}
+                    alt={formData.full_name || "Delegate"}
+                    className="w-full h-full object-cover"
+                  />
+                  {isUploadingPhoto && (
+                    <div className="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center text-white text-[10px] gap-1">
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      <span>Uploading...</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2 text-center sm:text-left flex-1">
+                  <h4 className="font-bold text-slate-900 text-sm">Participant Photograph</h4>
+                  <p className="text-slate-500 text-xs">
+                    You can replace or update the delegate photo. Accepted: JPG, PNG, WebP (Max 5 MB).
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingPhoto}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 transition-all shadow-sm cursor-pointer"
+                  >
+                    <Camera className="h-4 w-4 text-[#900C22]" />
+                    <span>{isUploadingPhoto ? "Uploading Photo..." : "Select New Photo from Device"}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Status & Registration Number Controls */}
@@ -580,24 +673,24 @@ export function InspectDelegateModal({
                 <button
                   type="button"
                   onClick={() => setIsEditMode(false)}
-                  className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                  className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={isSaving}
+                  disabled={isSaving || isUploadingPhoto}
                   className="inline-flex items-center gap-2 rounded-xl bg-[#900C22] hover:bg-[#74091A] text-white px-6 py-2.5 text-xs font-bold shadow-md disabled:opacity-50 cursor-pointer"
                 >
                   {isSaving ? (
                     <>
                       <RefreshCw className="h-4 w-4 animate-spin" />
-                      <span>Saving Changes...</span>
+                      <span>Saving & Syncing Everywhere...</span>
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4" />
-                      <span>Save Delegate Information</span>
+                      <span>Save & Sync All Data</span>
                     </>
                   )}
                 </button>
@@ -613,7 +706,7 @@ export function InspectDelegateModal({
               {/* TOP HERO PROFILE & PHOTO CARD */}
               <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-sm">
                 
-                {/* Delegate Photo Rendered */}
+                {/* Delegate Photo Rendered (Guaranteed Display) */}
                 <div className="relative w-32 h-40 sm:w-36 sm:h-44 rounded-2xl overflow-hidden border-2 border-[#900C22] bg-white shadow-md shrink-0">
                   {displayPhoto && !imgError ? (
                     <>
@@ -705,7 +798,7 @@ export function InspectDelegateModal({
                 </div>
               </div>
 
-              {/* PAYMENT & GATEWAY TRANSACTION CARD (Prominent Display) */}
+              {/* PAYMENT & GATEWAY TRANSACTION CARD */}
               <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/40 p-5 space-y-3">
                 <div className="flex items-center justify-between border-b border-emerald-200 pb-3">
                   <div className="flex items-center gap-2">

@@ -34,8 +34,9 @@ export async function GET(
       .limit(1)
       .maybeSingle();
 
-    // 3. Resolve secure signed photo URL
-    let photoUrl = "";
+    // 3. Resolve photo URL (Fallback to internal photo proxy endpoint)
+    let photoUrl = `/api/admin/registrations/${id}/photo`;
+
     if (registration.photo_storage_path) {
       if (
         registration.photo_storage_path.startsWith("data:") ||
@@ -48,9 +49,11 @@ export async function GET(
           const { data: signedData } = await supabase.storage
             .from("registration-photos")
             .createSignedUrl(registration.photo_storage_path, 7200);
-          photoUrl = signedData?.signedUrl || "";
+          if (signedData?.signedUrl) {
+            photoUrl = signedData.signedUrl;
+          }
         } catch (e) {
-          console.warn("Storage sign URL error:", e);
+          console.warn("Storage sign URL warning:", e);
         }
       }
     }
@@ -59,7 +62,7 @@ export async function GET(
       success: true,
       registration,
       payment: payment || null,
-      photo_url: photoUrl || null,
+      photo_url: photoUrl,
     });
   } catch (error: any) {
     console.error("Admin get registration error:", error);
@@ -115,6 +118,7 @@ export async function PATCH(
       "special_talent",
       "registration_status",
       "registration_number",
+      "photo_storage_path",
     ];
 
     for (const field of allowedFields) {
@@ -123,11 +127,15 @@ export async function PATCH(
       }
     }
 
-    // If changing to CONFIRMED and confirmed_at is null, record confirmed_at
+    // If changing to CONFIRMED
     if (updatePayload.registration_status === "CONFIRMED") {
       updatePayload.confirmed_at = new Date().toISOString();
+      if (!updatePayload.registration_number) {
+        updatePayload.registration_number = `TH2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      }
     }
 
+    // 1. Update registrations database record
     const { data: updated, error: updateError } = await supabase
       .from("registrations")
       .update(updatePayload)
@@ -140,16 +148,27 @@ export async function PATCH(
       return NextResponse.json({ error: updateError.message }, { status: 400 });
     }
 
-    // If status is CONFIRMED, ensure delegate entry exists
+    // 2. Synchronize delegates primary table
     if (updated.registration_status === "CONFIRMED") {
       await supabase.from("delegates").upsert({
         registration_id: id,
         is_active: true,
         updated_at: new Date().toISOString(),
       });
+    } else if (updated.registration_status === "CANCELLED") {
+      await supabase
+        .from("delegates")
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq("registration_id", id);
     }
 
-    // Audit log
+    // 3. Synchronize Google Sheets Jobs
+    await supabase.from("sheet_sync_jobs").insert({
+      registration_id: id,
+      status: "PENDING",
+    });
+
+    // 4. Record Detailed Audit Log
     await supabase.from("audit_logs").insert({
       registration_id: id,
       action: "ADMIN_DELEGATE_UPDATED",
@@ -159,13 +178,14 @@ export async function PATCH(
         updatedFields: Object.keys(updatePayload),
         registrationNumber: updated.registration_number,
         fullName: updated.full_name,
+        newStatus: updated.registration_status,
       },
     });
 
     return NextResponse.json({
       success: true,
       registration: updated,
-      message: "Delegate record successfully updated by admin.",
+      message: "Delegate record successfully updated and synchronized across all tables and pass views.",
     });
   } catch (error: any) {
     console.error("Admin update registration exception:", error);

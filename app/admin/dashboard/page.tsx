@@ -477,6 +477,7 @@ export default function AdminDashboardPage() {
           onRecordUpdated={(updated) => {
             setRegistrations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
             fetchMetrics();
+            fetchRegistrations(pagination.page);
           }}
         />
       )}
