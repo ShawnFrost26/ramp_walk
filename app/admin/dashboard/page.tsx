@@ -20,8 +20,18 @@ import {
   RefreshCw,
   X,
   Activity,
+  MessageSquare,
+  Check,
+  Tag,
+  Phone,
+  Mail,
+  Edit,
 } from "lucide-react";
 import { InspectDelegateModal } from "@/components/admin/InspectDelegateModal";
+import {
+  ResolveInquiryModal,
+  InquiryRecord,
+} from "@/components/admin/ResolveInquiryModal";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -44,9 +54,17 @@ export default function AdminDashboardPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
-  // Active Main Tab
-  const [activeTab, setActiveTab] = useState<"participants" | "audit">("participants");
+  // Active Main Tab: "participants" | "inquiries" | "audit"
+  const [activeTab, setActiveTab] = useState<"participants" | "inquiries" | "audit">("participants");
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+
+  // Inquiries Desk State
+  const [inquiries, setInquiries] = useState<InquiryRecord[]>([]);
+  const [inquiryStats, setInquiryStats] = useState({ total: 0, pending: 0, resolved: 0 });
+  const [isLoadingInquiries, setIsLoadingInquiries] = useState(false);
+  const [inquirySearch, setInquirySearch] = useState("");
+  const [inquiryStatusFilter, setInquiryStatusFilter] = useState("ALL");
+  const [selectedInquiryForResolution, setSelectedInquiryForResolution] = useState<InquiryRecord | null>(null);
 
   // 1. Fetch Aggregate Dashboard Metrics
   const fetchMetrics = useCallback(async () => {
@@ -65,13 +83,13 @@ export default function AdminDashboardPage() {
 
   // 2. Fetch Paginated Registrations
   const fetchRegistrations = useCallback(
-    async (pageToLoad = 1) => {
+    async (pageToLoad = 1, searchQuery = search) => {
       try {
         setIsLoading(true);
         const params = new URLSearchParams({
           page: pageToLoad.toString(),
           pageSize: "25",
-          search,
+          search: searchQuery,
           category: selectedCategory,
           status: selectedStatus,
         });
@@ -107,14 +125,56 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // 4. Fetch Inquiries List & Counters
+  const fetchInquiries = useCallback(
+    async (status = inquiryStatusFilter, query = inquirySearch) => {
+      try {
+        setIsLoadingInquiries(true);
+        const params = new URLSearchParams({
+          status: status || "ALL",
+          search: query || "",
+        });
+
+        const res = await fetch(`/api/admin/inquiries?${params.toString()}`);
+        if (res.status === 401) {
+          router.push("/admin/login");
+          return;
+        }
+
+        const data = await res.json();
+        setInquiries(data.inquiries || []);
+        if (data.stats) {
+          setInquiryStats(data.stats);
+        }
+      } catch (err) {
+        console.error("Failed to fetch inquiries:", err);
+      } finally {
+        setIsLoadingInquiries(false);
+      }
+    },
+    [inquiryStatusFilter, inquirySearch, router]
+  );
+
   useEffect(() => {
     fetchMetrics();
     fetchRegistrations(1);
-  }, [fetchMetrics, fetchRegistrations]);
+    fetchInquiries("ALL", "");
+  }, [fetchMetrics, fetchRegistrations, fetchInquiries]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     fetchRegistrations(1);
+  };
+
+  const handleInquirySearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchInquiries(inquiryStatusFilter, inquirySearch);
+  };
+
+  const handleJumpToParticipant = (term: string) => {
+    setActiveTab("participants");
+    setSearch(term);
+    fetchRegistrations(1, term);
   };
 
   const handleSyncSheets = async () => {
@@ -152,7 +212,7 @@ export default function AdminDashboardPage() {
             <div>
               <h1 className="text-2xl font-black text-slate-900">Event Administration Console</h1>
               <p className="text-xs text-slate-500">
-                Dharti Aaba Birsa Jayanti 2026 Ramp Walk • Auditions & Delegates Management
+                Dharti Aaba Birsa Jayanti 2026 Ramp Walk • Auditions, Delegates & Support Desk
               </p>
             </div>
           </div>
@@ -264,6 +324,33 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={() => {
+              setActiveTab("inquiries");
+              fetchInquiries();
+            }}
+            className={`relative rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+              activeTab === "inquiries"
+                ? "bg-[#900C22] text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            }`}
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span>Delegate Inquiries</span>
+            {inquiryStats.pending > 0 && (
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
+                  activeTab === "inquiries"
+                    ? "bg-white text-[#900C22]"
+                    : "bg-amber-500 text-white"
+                }`}
+              >
+                {inquiryStats.pending}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
               setActiveTab("audit");
               fetchAuditLogs();
             }}
@@ -287,7 +374,7 @@ export default function AdminDashboardPage() {
                 <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search name, phone, email, or TH26- number..."
+                  placeholder="Search name, phone, email, or TH2026- number..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1E293B]"
@@ -437,7 +524,195 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* TAB 2: AUDIT LOGS */}
+        {/* TAB 2: INQUIRIES DESK & RESOLUTION SECTION */}
+        {activeTab === "inquiries" && (
+          <div className="space-y-6">
+            {/* Quick Inquiries Metric Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-1 shadow-sm">
+                <span className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                  <MessageSquare className="h-4 w-4 text-blue-600" />
+                  <span>Total Inquiries Received</span>
+                </span>
+                <div className="text-3xl font-black text-slate-900">{inquiryStats.total}</div>
+                <p className="text-[10px] text-slate-400">All submitted queries & corrections</p>
+              </div>
+
+              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 space-y-1 shadow-sm">
+                <span className="text-xs text-amber-800 flex items-center gap-1.5 font-medium">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                  <span>Pending / Action Required</span>
+                </span>
+                <div className="text-3xl font-black text-amber-700">{inquiryStats.pending}</div>
+                <p className="text-[10px] text-amber-600">Spelling errors, pending payments</p>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 space-y-1 shadow-sm">
+                <span className="text-xs text-emerald-800 flex items-center gap-1.5 font-medium">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <span>Resolved Issues</span>
+                </span>
+                <div className="text-3xl font-black text-emerald-700">{inquiryStats.resolved}</div>
+                <p className="text-[10px] text-emerald-600">Corrected & closed inquiries</p>
+              </div>
+            </div>
+
+            {/* Inquiries Table Card */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl space-y-6">
+              {/* Search & Filter Bar */}
+              <form onSubmit={handleInquirySearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div className="sm:col-span-6 relative">
+                  <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search delegate name, phone, ticket number, email..."
+                    value={inquirySearch}
+                    onChange={(e) => setInquirySearch(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#900C22]"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <select
+                    value={inquiryStatusFilter}
+                    onChange={(e) => {
+                      setInquiryStatusFilter(e.target.value);
+                      fetchInquiries(e.target.value, inquirySearch);
+                    }}
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#900C22]"
+                  >
+                    <option value="ALL">All Statuses</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="IN_PROGRESS">IN PROGRESS</option>
+                    <option value="RESOLVED">RESOLVED</option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-3 flex gap-2">
+                  <button
+                    type="submit"
+                    className="w-full rounded-xl py-2 text-xs font-bold bg-[#900C22] hover:bg-[#74091A] text-white shadow-md transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                    <span>Search</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInquirySearch("");
+                      setInquiryStatusFilter("ALL");
+                      fetchInquiries("ALL", "");
+                    }}
+                    className="rounded-xl px-3 py-2 text-xs font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </form>
+
+              {/* Inquiries Table */}
+              <div className="overflow-x-auto rounded-xl border border-slate-200">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-3 px-4">Ticket</th>
+                      <th className="py-3 px-4">Date & Time</th>
+                      <th className="py-3 px-4">Delegate</th>
+                      <th className="py-3 px-4">Category</th>
+                      <th className="py-3 px-4">Issue Description</th>
+                      <th className="py-3 px-4">Resolution Status</th>
+                      <th className="py-3 px-4 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {isLoadingInquiries ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                          <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-[#900C22]" />
+                          Loading delegate inquiries...
+                        </td>
+                      </tr>
+                    ) : inquiries.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                          No inquiries found matching your filters.
+                        </td>
+                      </tr>
+                    ) : (
+                      inquiries.map((inq) => (
+                        <tr key={inq.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-3 px-4 font-mono font-bold text-[#900C22]">
+                            {inq.ticket_number || "INQ-PENDING"}
+                          </td>
+                          <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
+                            {formatDate(inq.created_at)}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="font-bold text-slate-900">{inq.name}</div>
+                            <div className="text-[11px] text-slate-500 flex items-center gap-2">
+                              <span>{inq.phone}</span>
+                              <span className="text-slate-300">•</span>
+                              <span className="truncate max-w-[130px]">{inq.email}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="inline-block rounded-md bg-slate-100 text-slate-700 px-2 py-0.5 text-[11px] font-semibold border border-slate-200 max-w-[180px] truncate">
+                              {inq.category}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 max-w-xs">
+                            <p className="line-clamp-2 text-slate-700 text-xs">
+                              {inq.message}
+                            </p>
+                            {inq.admin_notes && (
+                              <div className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-1 inline-block truncate max-w-full">
+                                <strong>Remark:</strong> {inq.admin_notes}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                                inq.status === "RESOLVED"
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : inq.status === "IN_PROGRESS"
+                                  ? "bg-blue-50 text-blue-700 border border-blue-200"
+                                  : "bg-amber-50 text-amber-700 border border-amber-200"
+                              }`}
+                            >
+                              {inq.status === "RESOLVED" ? (
+                                <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                              ) : (
+                                <Clock className="h-3 w-3 text-amber-600" />
+                              )}
+                              <span>{inq.status}</span>
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedInquiryForResolution(inq)}
+                              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-bold transition-all shadow-sm ${
+                                inq.status === "RESOLVED"
+                                  ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                                  : "bg-[#900C22] hover:bg-[#74091A] text-white"
+                              }`}
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                              <span>{inq.status === "RESOLVED" ? "View / Edit" : "Resolve"}</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: AUDIT LOGS */}
         {activeTab === "audit" && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl space-y-4">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -479,6 +754,21 @@ export default function AdminDashboardPage() {
             fetchMetrics();
             fetchRegistrations(pagination.page);
           }}
+        />
+      )}
+
+      {/* RESOLVE INQUIRY MODAL */}
+      {selectedInquiryForResolution && (
+        <ResolveInquiryModal
+          inquiry={selectedInquiryForResolution}
+          onClose={() => setSelectedInquiryForResolution(null)}
+          onInquiryUpdated={(updated) => {
+            setInquiries((prev) =>
+              prev.map((i) => (i.id === updated.id ? updated : i))
+            );
+            fetchInquiries();
+          }}
+          onJumpToParticipant={handleJumpToParticipant}
         />
       )}
 

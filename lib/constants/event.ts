@@ -20,6 +20,7 @@ export const EVENT_DETAILS = {
     landmark: "Near airport",
   },
   organizer: "Dharti Aaba Birsa Munda Jayanti Committee",
+  email: "veerbirsamunda5@gmail.com",
   contact: {
     phone: "8917598855",
     whatsapp: "8917598855",
