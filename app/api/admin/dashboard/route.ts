@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/auth/admin";
+import { getAdminSession } from "@/lib/auth/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { EVENT_DETAILS } from "@/lib/constants/event";
 
 export async function GET(req: NextRequest) {
   try {
-    if (!isAdminAuthenticated(req)) {
+    const session = getAdminSession(req);
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
@@ -43,6 +44,13 @@ export async function GET(req: NextRequest) {
       .eq("status", "PENDING");
 
     return NextResponse.json({
+      adminSession: {
+        isSuperAdmin: session.isSuperAdmin,
+        role: session.role,
+        username: session.username,
+        name: session.name || session.username,
+        email: session.email,
+      },
       metrics: {
         totalRegistrations,
         confirmedCount,

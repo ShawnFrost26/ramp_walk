@@ -26,15 +26,27 @@ import {
   Phone,
   Mail,
   Edit,
+  Crown,
+  UserCheck,
 } from "lucide-react";
 import { InspectDelegateModal } from "@/components/admin/InspectDelegateModal";
 import {
   ResolveInquiryModal,
   InquiryRecord,
 } from "@/components/admin/ResolveInquiryModal";
+import { AdminAccessRequestsSection } from "@/components/admin/AdminAccessRequestsSection";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+
+  // Admin Session (Super Admin vs Sub Admin)
+  const [adminSession, setAdminSession] = useState<{
+    isSuperAdmin: boolean;
+    role: string;
+    username: string;
+    name: string;
+    email?: string;
+  } | null>(null);
 
   // Metrics & State
   const [metrics, setMetrics] = useState<any>(null);
@@ -54,9 +66,10 @@ export default function AdminDashboardPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
-  // Active Main Tab: "participants" | "inquiries" | "audit"
-  const [activeTab, setActiveTab] = useState<"participants" | "inquiries" | "audit">("participants");
+  // Active Main Tab: "participants" | "inquiries" | "audit" | "admin_requests"
+  const [activeTab, setActiveTab] = useState<"participants" | "inquiries" | "audit" | "admin_requests">("participants");
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [pendingAdminCount, setPendingAdminCount] = useState(0);
 
   // Inquiries Desk State
   const [inquiries, setInquiries] = useState<InquiryRecord[]>([]);
@@ -65,6 +78,19 @@ export default function AdminDashboardPage() {
   const [inquirySearch, setInquirySearch] = useState("");
   const [inquiryStatusFilter, setInquiryStatusFilter] = useState("ALL");
   const [selectedInquiryForResolution, setSelectedInquiryForResolution] = useState<InquiryRecord | null>(null);
+
+  // 0. Fetch Pending Admin Access Requests Count (Super Admin only)
+  const fetchAdminPendingCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/requests");
+      if (res.ok) {
+        const data = await res.json();
+        setPendingAdminCount(data.stats?.pending || 0);
+      }
+    } catch (err) {
+      console.warn("Could not fetch admin pending count:", err);
+    }
+  }, []);
 
   // 1. Fetch Aggregate Dashboard Metrics
   const fetchMetrics = useCallback(async () => {
@@ -76,10 +102,16 @@ export default function AdminDashboardPage() {
       }
       const data = await res.json();
       setMetrics(data.metrics);
+      if (data.adminSession) {
+        setAdminSession(data.adminSession);
+        if (data.adminSession.isSuperAdmin) {
+          fetchAdminPendingCount();
+        }
+      }
     } catch (err) {
       console.error("Failed to fetch admin metrics:", err);
     }
-  }, [router]);
+  }, [router, fetchAdminPendingCount]);
 
   // 2. Fetch Paginated Registrations
   const fetchRegistrations = useCallback(
@@ -210,7 +242,20 @@ export default function AdminDashboardPage() {
               <Shield className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900">Event Administration Console</h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-black text-slate-900">Event Administration Console</h1>
+                {adminSession?.isSuperAdmin ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 text-[11px] font-black text-amber-900 shadow-sm">
+                    <Crown className="h-3 w-3 text-amber-700" />
+                    <span>Main Creator Admin (Master Access)</span>
+                  </span>
+                ) : adminSession ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-300 px-2.5 py-0.5 text-[11px] font-bold text-slate-700 shadow-sm">
+                    <UserCheck className="h-3 w-3 text-slate-600" />
+                    <span>Secretariat Admin: {adminSession.name}</span>
+                  </span>
+                ) : null}
+              </div>
               <p className="text-xs text-slate-500">
                 Dharti Aaba Birsa Jayanti 2026 Ramp Walk • Auditions, Delegates & Support Desk
               </p>
@@ -362,6 +407,36 @@ export default function AdminDashboardPage() {
           >
             Audit Log Trail
           </button>
+
+          {/* Main Creator Admin Exclusive Tab */}
+          {adminSession?.isSuperAdmin && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("admin_requests");
+                fetchAdminPendingCount();
+              }}
+              className={`relative rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+                activeTab === "admin_requests"
+                  ? "bg-slate-900 text-white shadow-sm ring-2 ring-slate-900/20"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              }`}
+            >
+              <Crown className="h-4 w-4 text-amber-400" />
+              <span>Admin Access Requests</span>
+              {pendingAdminCount > 0 && (
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
+                    activeTab === "admin_requests"
+                      ? "bg-amber-400 text-slate-900"
+                      : "bg-amber-500 text-white"
+                  }`}
+                >
+                  {pendingAdminCount}
+                </span>
+              )}
+            </button>
+          )}
         </div>
 
         {/* TAB 1: PARTICIPANTS DIRECTORY */}
@@ -740,6 +815,11 @@ export default function AdminDashboardPage() {
               )}
             </div>
           </div>
+        )}
+
+        {/* TAB 4: ADMIN ACCESS REQUESTS & TEAM APPROVALS (MAIN CREATOR ADMIN ONLY) */}
+        {activeTab === "admin_requests" && adminSession?.isSuperAdmin && (
+          <AdminAccessRequestsSection onRefreshParent={fetchAdminPendingCount} />
         )}
 
       </main>
