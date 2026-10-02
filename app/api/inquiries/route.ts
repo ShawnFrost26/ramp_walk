@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { sendInquiryNotificationEmail } from "@/lib/email/sender";
+import { createInquiryRecord } from "@/lib/db/inquiries";
 
 const inquirySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -16,55 +16,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validated = inquirySchema.parse(body);
 
-    const supabase = getSupabaseServerClient();
     const submittedAt = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 
-    // Generate fallback ticket number in case trigger isn't executed
-    const fallbackTicket = `INQ-${Math.floor(100000 + Math.random() * 900000)}`;
+    // Persist inquiry record across Supabase and local cache
+    const inquiry = await createInquiryRecord({
+      name: validated.name,
+      phone: validated.phone,
+      email: validated.email,
+      category: validated.category,
+      message: validated.message,
+    });
 
-    let ticketNumber = fallbackTicket;
-    let inquiryId: string | null = null;
-
-    try {
-      const { data, error } = await supabase
-        .from("inquiries")
-        .insert({
-          name: validated.name,
-          phone: validated.phone,
-          email: validated.email,
-          category: validated.category,
-          message: validated.message,
-          status: "PENDING",
-        })
-        .select()
-        .single();
-
-      if (!error && data) {
-        ticketNumber = data.ticket_number || fallbackTicket;
-        inquiryId = data.id;
-
-        // Try writing to audit_logs
-        try {
-          await supabase.from("audit_logs").insert({
-            action: "INQUIRY_SUBMITTED",
-            actor_type: "DELEGATE",
-            actor_identifier: validated.phone,
-            metadata: {
-              ticket_number: ticketNumber,
-              category: validated.category,
-              email: validated.email,
-              name: validated.name,
-            },
-          });
-        } catch (auditErr) {
-          console.warn("Audit log creation skipped:", auditErr);
-        }
-      } else if (error) {
-        console.warn("Supabase insert inquiry warning (using graceful ticket):", error.message);
-      }
-    } catch (dbErr: any) {
-      console.warn("DB connection warning for inquiries:", dbErr.message);
-    }
+    const ticketNumber = inquiry.ticket_number;
+    const inquiryId = inquiry.id;
 
     // Dispatch email directly to secretariat (veerbirsamunda5@gmail.com)
     const emailResult = await sendInquiryNotificationEmail({

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth/admin";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getAllInquiries } from "@/lib/db/inquiries";
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,47 +9,17 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status") || "";
+    const status = searchParams.get("status") || "ALL";
     const search = searchParams.get("search") || "";
 
-    const supabase = getSupabaseServerClient();
-
-    let query = supabase
-      .from("inquiries")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (status && status !== "ALL") {
-      query = query.eq("status", status);
-    }
-
-    if (search.trim()) {
-      const term = `%${search.trim()}%`;
-      query = query.or(
-        `name.ilike.${term},phone.ilike.${term},email.ilike.${term},ticket_number.ilike.${term},message.ilike.${term}`
-      );
-    }
-
-    const { data: inquiries, error } = await query;
-
-    if (error && error.code !== "PGRST116") {
-      console.warn("Inquiries fetch warning:", error.message);
-    }
-
-    const records = inquiries || [];
-
-    // Calculate quick counts
-    const total = records.length;
-    const pending = records.filter((i) => i.status === "PENDING" || i.status === "IN_PROGRESS").length;
-    const resolved = records.filter((i) => i.status === "RESOLVED").length;
+    const { inquiries, stats } = await getAllInquiries({
+      status,
+      search,
+    });
 
     return NextResponse.json({
-      inquiries: records,
-      stats: {
-        total,
-        pending,
-        resolved,
-      },
+      inquiries,
+      stats,
     });
   } catch (error: any) {
     console.error("Admin inquiries GET error:", error);
