@@ -137,11 +137,11 @@ export default function DelegateLoginPage() {
                 {isLoading ? (
                   <>
                     <RefreshCw className="h-4 w-4 animate-spin" />
-                    <span>Verifying Credentials...</span>
+                    <span>Logging in...</span>
                   </>
                 ) : (
                   <>
-                    <span>Access Delegate Dashboard</span>
+                    <span>Login</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
