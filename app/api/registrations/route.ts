@@ -101,8 +101,8 @@ export async function POST(req: NextRequest) {
 
       photo_storage_path: validData.photoStoragePath,
 
-      // Initial status is strictly PENDING_PAYMENT — NOT inserted into primary delegates table
-      registration_status: "PENDING_PAYMENT",
+      // Initial status is strictly PAYMENT_PENDING — NOT inserted into primary delegates table
+      registration_status: "PAYMENT_PENDING",
       terms_accepted_at: new Date().toISOString(),
       privacy_accepted_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
       }
       savedId = existingPendingId;
     } else {
-      // 4. Insert into Supabase registrations table as PENDING_PAYMENT
+      // 4. Insert into Supabase registrations table as PAYMENT_PENDING
       const { data: inserted, error: insertError } = await supabase
         .from("registrations")
         .insert(registrationPayload)
@@ -148,14 +148,14 @@ export async function POST(req: NextRequest) {
         category: validData.category,
         fullName: validData.fullName,
         hasPhoto: true,
-        status: "PENDING_PAYMENT",
+        status: "PAYMENT_PENDING",
       },
     });
 
     return NextResponse.json({
       success: true,
       registrationId: savedId,
-      status: "PENDING_PAYMENT",
+      status: "PAYMENT_PENDING",
       amount: EVENT_DETAILS.registrationFee,
       currency: EVENT_DETAILS.currency,
       message: "Registration pending payment. Please proceed to complete checkout.",

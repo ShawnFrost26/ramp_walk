@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     await supabase
       .from("registrations")
       .update({
-        registration_status: "PENDING_PAYMENT",
+        registration_status: "PAYMENT_PENDING",
         updated_at: new Date().toISOString(),
       })
       .eq("id", registrationId);

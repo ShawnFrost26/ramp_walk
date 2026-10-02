@@ -27,8 +27,8 @@ export const EVENT_DETAILS = {
     email: "veerbirsamunda5@gmail.com",
     operatingHours: "Monday to Saturday: 10:30 AM – 05:30 PM IST",
   },
-  maxPhotoSizeMB: 5,
-  maxPhotoSizeBytes: 5 * 1024 * 1024,
+  maxPhotoSizeMB: 1,
+  maxPhotoSizeBytes: 1 * 1024 * 1024,
   allowedPhotoTypes: ["image/jpeg", "image/png", "image/webp"],
 };
 

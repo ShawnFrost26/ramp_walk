@@ -289,17 +289,14 @@ function CheckoutContent() {
                   )}
                 </button>
 
-                {/* Local Dev / Test Mode Simulator */}
-                <div className="text-center pt-2">
-                  <button
-                    type="button"
-                    onClick={handleSimulatePayment}
-                    className="text-xs text-[#900C22] hover:text-[#74091A] underline font-medium"
-                  >
-                    ⚡ Test Mode: Simulate Instant Successful Payment
-                  </button>
-                  <p className="text-[10px] text-slate-400 mt-1">
-                    Use to complete end-to-end flow without requiring live gateway credentials.
+                {/* Official Secretariat Security & Trust Seal */}
+                <div className="text-center pt-2 space-y-1">
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-slate-700 font-semibold">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Official Secretariat Payment Gateway</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Instant registration confirmation & immediate Digital Delegate Pass generation upon successful transaction.
                   </p>
                 </div>
               </div>

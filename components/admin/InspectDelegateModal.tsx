@@ -346,13 +346,12 @@ export function InspectDelegateModal({
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">Registration Status</label>
                     <select
-                      value={formData.registration_status || "PENDING_PAYMENT"}
+                      value={formData.registration_status || "PAYMENT_PENDING"}
                       onChange={(e) => handleInputChange("registration_status", e.target.value)}
                       className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#900C22]"
                     >
                       <option value="CONFIRMED">CONFIRMED (Paid Delegate)</option>
-                      <option value="PENDING_PAYMENT">PENDING_PAYMENT (Awaiting Fee)</option>
-                      <option value="PAYMENT_PENDING">PAYMENT_PENDING</option>
+                      <option value="PAYMENT_PENDING">PAYMENT_PENDING (Awaiting Fee)</option>
                       <option value="DRAFT">DRAFT</option>
                       <option value="CANCELLED">CANCELLED</option>
                       <option value="FAILED">FAILED</option>

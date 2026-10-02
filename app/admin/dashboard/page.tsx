@@ -28,6 +28,8 @@ import {
   Edit,
   Crown,
   UserCheck,
+  AlertTriangle,
+  MessageCircle,
 } from "lucide-react";
 import { InspectDelegateModal } from "@/components/admin/InspectDelegateModal";
 import {
@@ -66,10 +68,16 @@ export default function AdminDashboardPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
-  // Active Main Tab: "participants" | "inquiries" | "audit" | "admin_requests"
-  const [activeTab, setActiveTab] = useState<"participants" | "inquiries" | "audit" | "admin_requests">("participants");
+  // Active Main Tab: "participants" | "pending_delegates" | "inquiries" | "audit" | "admin_requests"
+  const [activeTab, setActiveTab] = useState<"participants" | "pending_delegates" | "inquiries" | "audit" | "admin_requests">("participants");
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [pendingAdminCount, setPendingAdminCount] = useState(0);
+
+  // Pending / Incomplete Delegates State
+  const [pendingRegistrations, setPendingRegistrations] = useState<any[]>([]);
+  const [isLoadingPending, setIsLoadingPending] = useState(false);
+  const [pendingSearch, setPendingSearch] = useState("");
+  const [pendingCategory, setPendingCategory] = useState("");
 
   // Inquiries Desk State
   const [inquiries, setInquiries] = useState<InquiryRecord[]>([]);
@@ -144,6 +152,36 @@ export default function AdminDashboardPage() {
     [search, selectedCategory, selectedStatus, router]
   );
 
+  // 2b. Fetch Pending & Incomplete Registrations
+  const fetchPendingRegistrations = useCallback(
+    async (query = pendingSearch, cat = pendingCategory) => {
+      try {
+        setIsLoadingPending(true);
+        const params = new URLSearchParams({
+          page: "1",
+          pageSize: "50",
+          search: query,
+          category: cat,
+          status: "PAYMENT_PENDING",
+        });
+
+        const res = await fetch(`/api/admin/registrations?${params.toString()}`);
+        if (res.status === 401) {
+          router.push("/admin/login");
+          return;
+        }
+
+        const data = await res.json();
+        setPendingRegistrations(data.registrations || []);
+      } catch (err) {
+        console.error("Failed to load pending registrations:", err);
+      } finally {
+        setIsLoadingPending(false);
+      }
+    },
+    [pendingSearch, pendingCategory, router]
+  );
+
   // 3. Fetch Audit Logs
   const fetchAuditLogs = async () => {
     try {
@@ -190,8 +228,9 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     fetchMetrics();
     fetchRegistrations(1);
+    fetchPendingRegistrations();
     fetchInquiries("ALL", "");
-  }, [fetchMetrics, fetchRegistrations, fetchInquiries]);
+  }, [fetchMetrics, fetchRegistrations, fetchPendingRegistrations, fetchInquiries]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -357,10 +396,21 @@ export default function AdminDashboardPage() {
               <p className="text-[10px] text-emerald-600">Verified payment completed</p>
             </div>
 
-            <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 space-y-1 shadow-sm">
-              <span className="text-xs text-amber-800 flex items-center gap-1.5 font-medium">
-                <Clock className="h-4 w-4 text-amber-600" />
-                <span>Pending Payment</span>
+            <div
+              onClick={() => {
+                setActiveTab("pending_delegates");
+                fetchPendingRegistrations();
+              }}
+              className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 space-y-1 shadow-sm cursor-pointer hover:border-amber-400 hover:shadow-md transition-all group"
+            >
+              <span className="text-xs text-amber-800 flex items-center justify-between font-medium">
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                  <span>Pending Payment</span>
+                </span>
+                <span className="text-[10px] text-amber-700 underline group-hover:text-amber-900 font-bold">
+                  View →
+                </span>
               </span>
               <div className="text-3xl font-black text-amber-700">{metrics.pendingCount}</div>
               <p className="text-[10px] text-amber-600">Checkout in progress / draft</p>
@@ -380,17 +430,44 @@ export default function AdminDashboardPage() {
         )}
 
         {/* NAVIGATION TABS */}
-        <div className="flex items-center gap-3 border-b border-slate-200 pb-2">
+        <div className="flex items-center gap-3 border-b border-slate-200 pb-2 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab("participants")}
-            className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all ${
+            className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
               activeTab === "participants"
                 ? "bg-[#1E293B] text-white shadow-sm"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             Participants List
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("pending_delegates");
+              fetchPendingRegistrations();
+            }}
+            className={`relative rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+              activeTab === "pending_delegates"
+                ? "bg-amber-600 text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            }`}
+          >
+            <Clock className="h-4 w-4" />
+            <span>Pending & Incomplete</span>
+            {metrics?.pendingCount > 0 && (
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
+                  activeTab === "pending_delegates"
+                    ? "bg-white text-amber-800"
+                    : "bg-amber-500 text-white"
+                }`}
+              >
+                {metrics.pendingCount}
+              </span>
+            )}
           </button>
 
           <button
@@ -626,6 +703,183 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
+        {/* TAB 1B: PENDING & INCOMPLETE REGISTRATIONS */}
+        {activeTab === "pending_delegates" && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                  <h2 className="text-lg font-black text-slate-900">
+                    Pending & Incomplete Registrations
+                  </h2>
+                  <span className="rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-bold px-2.5 py-0.5">
+                    {metrics?.pendingCount || pendingRegistrations.length} Incomplete
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Delegates who initiated registration but payment failed or was interrupted. Inspect their entered details, photograph, and assist them to complete confirmation.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => fetchPendingRegistrations()}
+                className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-all"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${isLoadingPending ? "animate-spin" : ""}`} />
+                <span>Refresh List</span>
+              </button>
+            </div>
+
+            {/* Search & Filter Bar */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                fetchPendingRegistrations();
+              }}
+              className="grid grid-cols-1 sm:grid-cols-12 gap-3"
+            >
+              <div className="sm:col-span-6 relative">
+                <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search pending name, phone, or email..."
+                  value={pendingSearch}
+                  onChange={(e) => setPendingSearch(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                />
+              </div>
+
+              <div className="sm:col-span-4">
+                <select
+                  value={pendingCategory}
+                  onChange={(e) => setPendingCategory(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-600"
+                >
+                  <option value="">All Categories</option>
+                  {COMPETITION_CATEGORIES.map((c) => (
+                    <option key={c.id} value={c.title}>
+                      {c.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <button
+                  type="submit"
+                  className="w-full rounded-xl py-2 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md transition-all"
+                >
+                  Filter
+                </button>
+              </div>
+            </form>
+
+            {/* Table */}
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th className="py-3 px-4">Ref / Reg No</th>
+                    <th className="py-3 px-4">Pending Delegate</th>
+                    <th className="py-3 px-4">Category</th>
+                    <th className="py-3 px-4">Contact Details</th>
+                    <th className="py-3 px-4">Location</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {isLoadingPending ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-slate-400">
+                        <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-amber-600" />
+                        Loading pending delegates...
+                      </td>
+                    </tr>
+                  ) : pendingRegistrations.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-slate-400">
+                        <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto mb-2" />
+                        <p className="font-semibold text-slate-700">No Pending Registrations Found</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          All applicants have either completed payment or there are no abandoned registrations at this time.
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    pendingRegistrations.map((reg) => (
+                      <tr key={reg.id} className="hover:bg-amber-50/40 transition-colors">
+                        <td className="py-3 px-4 font-mono font-bold text-amber-800">
+                          {reg.registration_number || `PENDING-${reg.id.slice(0, 6)}`}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="font-bold text-slate-900">{reg.full_name}</div>
+                          <div className="text-[11px] text-slate-400">
+                            {reg.gender || "Delegate"} • DOB: {reg.date_of_birth || "—"}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="font-medium text-slate-700">{reg.category}</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1 font-mono text-slate-700 font-semibold">
+                            <span>{reg.mobile_number}</span>
+                            <a
+                              href={`https://wa.me/91${reg.mobile_number.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
+                                reg.full_name
+                              )},%20we%20noticed%20your%20registration%20for%20Dharti%20Aaba%20Birsa%20Jayanti%202026%20Ramp%20Walk%20is%20incomplete/pending.%20Please%20let%20us%20know%20if%20you%20need%20assistance.`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-emerald-600 hover:text-emerald-700 ml-1"
+                              title="Chat on WhatsApp"
+                            >
+                              <MessageCircle className="h-3.5 w-3.5" />
+                            </a>
+                          </div>
+                          <div className="text-[11px] text-slate-400 truncate max-w-[150px]">{reg.email}</div>
+                        </td>
+                        <td className="py-3 px-4 text-slate-700">
+                          {reg.city_or_village || reg.district ? `${reg.city_or_village || ""}, ${reg.district || ""}` : "—"}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-[10px] font-bold text-amber-700">
+                            <Clock className="h-3 w-3" />
+                            <span>Payment Pending</span>
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setInspectRecord(reg)}
+                              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-amber-600 hover:text-amber-800 transition-colors shadow-sm"
+                              title="Inspect what delegate registered and view photo"
+                            >
+                              <Eye className="h-3.5 w-3.5 text-amber-600" />
+                              <span>View / Edit Details</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+              <span>
+                💡 You can view all information submitted by the delegate (including uploaded photo, personal & cultural info).
+              </span>
+              <span>
+                Click &quot;View / Edit Details&quot; to inspect or update their status to CONFIRMED.
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* TAB 2: INQUIRIES DESK & RESOLUTION SECTION */}
         {activeTab === "inquiries" && (
           <div className="space-y-6">
@@ -858,8 +1112,14 @@ export default function AdminDashboardPage() {
           onClose={() => setInspectRecord(null)}
           onRecordUpdated={(updated) => {
             setRegistrations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+            setPendingRegistrations((prev) =>
+              updated.registration_status === "CONFIRMED"
+                ? prev.filter((r) => r.id !== updated.id)
+                : prev.map((r) => (r.id === updated.id ? updated : r))
+            );
             fetchMetrics();
             fetchRegistrations(pagination.page);
+            fetchPendingRegistrations();
           }}
         />
       )}

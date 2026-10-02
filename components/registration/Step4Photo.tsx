@@ -19,7 +19,7 @@ export function Step4Photo({ formData, updateFormData, errors }: Step4Props) {
   const handleFile = async (file: File) => {
     setUploadError(null);
 
-    // 1. Client-Side Size Validation (5 MB limit)
+    // 1. Client-Side Size Validation (1 MB limit)
     if (file.size > EVENT_DETAILS.maxPhotoSizeBytes) {
       setUploadError(
         `File is too large (${(file.size / (1024 * 1024)).toFixed(
