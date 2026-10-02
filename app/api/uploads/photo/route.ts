@@ -11,14 +11,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // 1. Validate file size (1 MB limit)
+    // 1. Validate file size (5 MB limit)
     if (file.size > EVENT_DETAILS.maxPhotoSizeBytes) {
       return NextResponse.json(
         {
-          error: `File size exceeds the 1 MB limit (uploaded size: ${(
+          error: `File size exceeds the ${EVENT_DETAILS.maxPhotoSizeMB} MB limit (uploaded size: ${(
             file.size /
             (1024 * 1024)
-          ).toFixed(2)} MB). Please compress your photo before uploading.`,
+          ).toFixed(2)} MB). Please select a photo under ${EVENT_DETAILS.maxPhotoSizeMB} MB.`,
         },
         { status: 400 }
       );

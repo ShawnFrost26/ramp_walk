@@ -14,6 +14,7 @@ import {
   step1BioDataSchema,
   step2AddressContactSchema,
   step3CompetitionSchema,
+  step4PhotoSchema,
   step5ReviewConsentSchema,
 } from "@/lib/validations/registration";
 import { EVENT_DETAILS, COMPETITION_CATEGORIES } from "@/lib/constants/event";
@@ -185,7 +186,20 @@ function RegistrationContent() {
     }
 
     if (currentStep === 4) {
-      // Photo is recommended. If user has not uploaded one, allow them to proceed or recommend uploading
+      const res = step4PhotoSchema.safeParse({
+        photoStoragePath: formData.photoStoragePath,
+        photoPreviewUrl: formData.photoPreviewUrl,
+      });
+
+      if (!res.success) {
+        const fieldErrors = res.error.flatten().fieldErrors;
+        const errMap: Record<string, string> = {};
+        for (const [key, val] of Object.entries(fieldErrors)) {
+          if (val && val[0]) errMap[key] = val[0];
+        }
+        setErrors(errMap);
+        return false;
+      }
       return true;
     }
 
@@ -228,6 +242,12 @@ function RegistrationContent() {
   const handleProceedToPayment = async () => {
     const isValid = await validateCurrentStep();
     if (!isValid) return;
+
+    if (!formData.photoStoragePath) {
+      setServerError("Profile photograph is mandatory. Please upload your photograph in Step 4 before proceeding to payment.");
+      setCurrentStep(4);
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -302,6 +322,10 @@ function RegistrationContent() {
             errors={errors}
             isSubmitting={isSubmitting}
             onProceedToPayment={handleProceedToPayment}
+            onGoToStep={(step) => {
+              setCurrentStep(step);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           />
         )}
 

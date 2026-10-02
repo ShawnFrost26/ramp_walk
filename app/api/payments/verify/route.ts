@@ -48,10 +48,9 @@ export async function POST(req: NextRequest) {
       regNumber = rpcData[0].registration_number;
     } else {
       console.warn("RPC fallback execution:", rpcError?.message);
-      // Fallback direct update if DB procedure not yet migrated
-      // Generate registration number
-      const randomSeq = Math.floor(100000 + Math.random() * 900000);
-      regNumber = `TH26-${randomSeq}`;
+      // Generate registration number (TH2026-XXXX format)
+      const randomSeq = Math.floor(1000 + Math.random() * 9000);
+      regNumber = `TH2026-${randomSeq}`;
 
       await supabase
         .from("registrations")

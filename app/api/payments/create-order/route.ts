@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     // 1. Fetch Registration Record
     const { data: registration, error: regError } = await supabase
       .from("registrations")
-      .select("id, full_name, email, mobile_number, category, registration_status, registration_number")
+      .select("id, full_name, email, mobile_number, category, registration_status, registration_number, photo_storage_path")
       .eq("id", registrationId)
       .maybeSingle();
 
@@ -31,6 +31,16 @@ export async function POST(req: NextRequest) {
           error: "Registration is already confirmed and paid.",
           isAlreadyConfirmed: true,
           registrationNumber: registration.registration_number,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Strict Backend Enforcement: Mandatory Photo Upload Before Payment Gateway
+    if (registration && !registration.photo_storage_path) {
+      return NextResponse.json(
+        {
+          error: "Mandatory photo upload is missing. You must upload your photograph before payment can be initiated.",
         },
         { status: 400 }
       );
@@ -74,11 +84,11 @@ export async function POST(req: NextRequest) {
       signature_verified: false,
     });
 
-    // 5. Update Registration status to PAYMENT_PENDING
+    // 5. Update Registration status to PENDING_PAYMENT
     await supabase
       .from("registrations")
       .update({
-        registration_status: "PAYMENT_PENDING",
+        registration_status: "PENDING_PAYMENT",
         updated_at: new Date().toISOString(),
       })
       .eq("id", registrationId);

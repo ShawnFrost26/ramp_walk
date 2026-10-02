@@ -16,18 +16,68 @@ export async function GET(req: NextRequest) {
     const supabase = getSupabaseServerClient();
 
     // Query registration details
-    const { data: registration, error: regError } = await supabase
-      .from("registrations")
-      .select("*")
-      .or(`id.eq.${session.registrationId},registration_number.eq.${session.registrationNumber}`)
-      .maybeSingle();
+    let registration: any = null;
 
-    if (regError && regError.code !== "PGRST116") {
-      console.warn("Supabase query warning:", regError.message);
+    if (session.registrationId && !session.registrationId.startsWith("demo-") && !session.registrationId.startsWith("pending-")) {
+      const { data, error: regError } = await supabase
+        .from("registrations")
+        .select("*")
+        .eq("id", session.registrationId)
+        .maybeSingle();
+
+      if (regError && regError.code !== "PGRST116") {
+        console.warn("Supabase delegate query warning:", regError.message);
+      }
+      registration = data;
+    }
+
+    if (!registration && session.mobileNumber && session.dateOfBirth) {
+      const { data, error: regError } = await supabase
+        .from("registrations")
+        .select("*")
+        .eq("mobile_number", session.mobileNumber)
+        .eq("date_of_birth", session.dateOfBirth)
+        .maybeSingle();
+
+      if (regError && regError.code !== "PGRST116") {
+        console.warn("Supabase delegate fallback query warning:", regError.message);
+      }
+      registration = data;
     }
 
     if (registration) {
-      // Query payment attempt
+      // 1. Resolve secure photo URL via Supabase Storage signed URL
+      let resolvedPhotoUrl = "";
+      if (registration.photo_storage_path) {
+        if (
+          registration.photo_storage_path.startsWith("data:") ||
+          registration.photo_storage_path.startsWith("http://") ||
+          registration.photo_storage_path.startsWith("https://")
+        ) {
+          resolvedPhotoUrl = registration.photo_storage_path;
+        } else {
+          // Attempt to generate 2-hour signed URL for private bucket
+          try {
+            const { data: signedData, error: signError } = await supabase.storage
+              .from("registration-photos")
+              .createSignedUrl(registration.photo_storage_path, 7200);
+
+            if (!signError && signedData?.signedUrl) {
+              resolvedPhotoUrl = signedData.signedUrl;
+            } else {
+              // Try public URL if bucket is configured public
+              const { data: publicData } = supabase.storage
+                .from("registration-photos")
+                .getPublicUrl(registration.photo_storage_path);
+              resolvedPhotoUrl = publicData?.publicUrl || "";
+            }
+          } catch (e) {
+            console.warn("Signed URL generation warning:", e);
+          }
+        }
+      }
+
+      // 2. Query latest payment attempt
       const { data: payment } = await supabase
         .from("payment_attempts")
         .select("*")
@@ -36,24 +86,32 @@ export async function GET(req: NextRequest) {
         .limit(1)
         .maybeSingle();
 
+      const isPendingPayment =
+        registration.registration_status === "PENDING_PAYMENT" ||
+        registration.registration_status === "DRAFT" ||
+        registration.registration_status === "PAYMENT_PENDING";
+
       return NextResponse.json({
         authenticated: true,
         delegate: {
           ...registration,
+          photo_url: resolvedPhotoUrl || null,
+          isPendingPayment,
           payment: payment || null,
         },
       });
     }
 
-    // Dev fallback if session exists but database table is empty
+    // Dev Fallback for local demo preview
+    const isMockPending = session.isPending || session.status === "PENDING_PAYMENT";
     return NextResponse.json({
       authenticated: true,
       delegate: {
-        id: session.registrationId,
-        registration_number: session.registrationNumber,
-        full_name: "Birsa Samad",
+        id: session.registrationId || "demo-mock-id",
+        registration_number: isMockPending ? null : (session.registrationNumber || "TH2026-1001"),
+        full_name: isMockPending ? "Birsa Samad (Pending)" : "Birsa Samad",
         guardian_name: "Sukhram Samad",
-        date_of_birth: "2002-05-14",
+        date_of_birth: session.dateOfBirth || "2002-05-14",
         gender: "MALE",
         tribal_community: "Munda",
         mobile_number: session.mobileNumber || "9876543210",
@@ -62,21 +120,27 @@ export async function GET(req: NextRequest) {
         age_category: "Youth / Main (18 – 28 Years)",
         attire_name: "Munda Tar-Gamcha & Silk Kurta",
         attire_representation: "Traditional Munda Warrior Attire",
-        attire_description: "Hand-woven cotton and tasar silk with tribal arrow and tree motifs, symbolizing courage and nature harmony.",
+        attire_description:
+          "Hand-woven cotton and tasar silk with tribal arrow and tree motifs, symbolizing courage and nature harmony.",
         state: "Odisha",
         district: "Sundargarh",
         city_or_village: "Rourkela",
         full_address: "Sector 4, Near Birsa Munda Stadium, Rourkela",
         pincode: "769002",
-        registration_status: "CONFIRMED",
+        photo_storage_path: "mock/participants/sample.jpg",
+        photo_url: null, // Will trigger elegant fallback avatar with initials/icon in UI
+        registration_status: isMockPending ? "PENDING_PAYMENT" : "CONFIRMED",
+        isPendingPayment: isMockPending,
         created_at: new Date().toISOString(),
-        confirmed_at: new Date().toISOString(),
-        payment: {
-          amount: 50000,
-          currency: "INR",
-          status: "CAPTURED",
-          razorpay_payment_id: "pay_confirmed_101",
-        },
+        confirmed_at: isMockPending ? null : new Date().toISOString(),
+        payment: isMockPending
+          ? null
+          : {
+              amount: 50000,
+              currency: "INR",
+              status: "CAPTURED",
+              razorpay_payment_id: "pay_confirmed_101",
+            },
       },
     });
   } catch (error: any) {

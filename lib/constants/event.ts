@@ -20,8 +20,8 @@ export const EVENT_DETAILS = {
     email: "support@birsa-jayanti2026.org",
     whatsapp: "+91 94370 00000",
   },
-  maxPhotoSizeMB: 1,
-  maxPhotoSizeBytes: 1 * 1024 * 1024,
+  maxPhotoSizeMB: 5,
+  maxPhotoSizeBytes: 5 * 1024 * 1024,
   allowedPhotoTypes: ["image/jpeg", "image/png", "image/webp"],
 };
 

@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
-import { UserCheck, ShieldCheck, AlertCircle, ArrowRight, RefreshCw, KeyRound } from "lucide-react";
+import { UserCheck, ShieldCheck, AlertCircle, ArrowRight, RefreshCw, Calendar, Phone } from "lucide-react";
 
 export default function DelegateLoginPage() {
   const router = useRouter();
-  const [registrationNumber, setRegistrationNumber] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,16 +18,15 @@ export default function DelegateLoginPage() {
     e.preventDefault();
     setError(null);
 
-    const cleanReg = registrationNumber.trim().toUpperCase();
     const cleanPhone = mobileNumber.trim().replace(/\D/g, "");
-
-    if (!cleanReg.startsWith("TH26-")) {
-      setError("Registration number must begin with TH26- (e.g. TH26-001001)");
-      return;
-    }
 
     if (cleanPhone.length !== 10) {
       setError("Please enter your registered 10-digit mobile number");
+      return;
+    }
+
+    if (!dateOfBirth) {
+      setError("Please select your date of birth as provided during registration");
       return;
     }
 
@@ -37,8 +36,8 @@ export default function DelegateLoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          registrationNumber: cleanReg,
           mobileNumber: cleanPhone,
+          dateOfBirth,
         }),
       });
 
@@ -71,8 +70,8 @@ export default function DelegateLoginPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Delegate Portal Login
             </h1>
-            <p className="text-xs text-slate-500">
-              Access your official Dharti Aaba Ramp Walk 2026 digital pass and registration record.
+            <p className="text-xs text-slate-500 max-w-xs mx-auto">
+              Log in at any time with your Phone Number and Date of Birth to access your official pass or complete a pending registration.
             </p>
           </div>
 
@@ -86,27 +85,6 @@ export default function DelegateLoginPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Registration Number */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Registration Number
-                </label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. TH26-001001"
-                    value={registrationNumber}
-                    onChange={(e) => setRegistrationNumber(e.target.value.toUpperCase())}
-                    className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 font-mono placeholder-slate-400 uppercase focus:outline-none focus:border-[#A26715] focus:ring-2 focus:ring-[#A26715]/20"
-                  />
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Sent on screen upon successful payment confirmation.
-                </p>
-              </div>
-
               {/* Mobile Number */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-slate-700">
@@ -121,9 +99,33 @@ export default function DelegateLoginPage() {
                     placeholder="9876543210"
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ""))}
-                    className="w-full rounded-xl border border-slate-300 bg-white pl-12 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#A26715] focus:ring-2 focus:ring-[#A26715]/20"
+                    className="w-full rounded-xl border border-slate-300 bg-white pl-12 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#A26715] focus:ring-2 focus:ring-[#A26715]/20 font-medium"
                   />
                 </div>
+                <p className="text-[11px] text-slate-400">
+                  The 10-digit mobile number used when submitting your entry.
+                </p>
+              </div>
+
+              {/* Date of Birth */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Date of Birth (DOB)
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
+                  <input
+                    type="date"
+                    required
+                    value={dateOfBirth}
+                    max={new Date().toISOString().split("T")[0]}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#A26715] focus:ring-2 focus:ring-[#A26715]/20 font-medium"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Matches your birth date recorded in Section I.
+                </p>
               </div>
 
               {/* Submit Button */}
@@ -158,7 +160,7 @@ export default function DelegateLoginPage() {
 
           <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
             <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            <span>Secure Passwordless Delegate Authentication</span>
+            <span>Encrypted Session • Official Veer Birsa Munda Portal</span>
           </div>
 
         </div>

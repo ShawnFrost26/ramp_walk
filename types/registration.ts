@@ -1,4 +1,4 @@
-export type RegistrationStatus = "DRAFT" | "PAYMENT_PENDING" | "CONFIRMED" | "CANCELLED";
+export type RegistrationStatus = "DRAFT" | "PENDING_PAYMENT" | "PAYMENT_PENDING" | "CONFIRMED" | "CANCELLED" | "FAILED";
 export type PaymentStatus = "CREATED" | "AUTHORIZED" | "CAPTURED" | "FAILED" | "REFUNDED";
 export type Gender = "MALE" | "FEMALE" | "OTHER";
 
@@ -33,8 +33,8 @@ export interface RegistrationFormData {
   attireDescription?: string;
   specialTalent?: string;
 
-  // Step 4: Photo
-  photoStoragePath?: string;
+  // Step 4: Photo (Mandatory)
+  photoStoragePath: string;
   photoPreviewUrl?: string;
 
   // Step 5: Terms & Consent
@@ -71,12 +71,14 @@ export interface RegistrationRecord {
   attire_description: string | null;
   special_talent: string | null;
   photo_storage_path: string | null;
+  photo_url?: string | null;
   registration_status: RegistrationStatus;
   terms_accepted_at: string | null;
   privacy_accepted_at: string | null;
   created_at: string;
   updated_at: string;
   confirmed_at: string | null;
+  isPendingPayment?: boolean;
 }
 
 export interface PaymentAttemptRecord {

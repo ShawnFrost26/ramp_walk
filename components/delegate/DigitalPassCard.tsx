@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { EVENT_DETAILS } from "@/lib/constants/event";
-import { ShieldCheck, Printer, Sparkles, User } from "lucide-react";
+import { ShieldCheck, Printer, Sparkles, User, RefreshCw } from "lucide-react";
 
 interface DigitalPassCardProps {
   delegate: any;
@@ -11,6 +11,10 @@ interface DigitalPassCardProps {
 
 export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const photoSrc = delegate?.photo_url || delegate?.photoPreviewUrl || delegate?.photo_storage_path;
 
   useEffect(() => {
     if (!delegate?.registration_number) return;
@@ -57,7 +61,7 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
         <button
           type="button"
           onClick={handlePrint}
-          className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold bg-[#900C22] hover:bg-[#74091A] text-white shadow-md transition-all"
+          className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold bg-[#900C22] hover:bg-[#74091A] text-white shadow-md transition-all cursor-pointer"
         >
           <Printer className="h-4 w-4" />
           <span>Print / Save Pass (PDF)</span>
@@ -87,22 +91,33 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
 
         {/* Middle Section: Photo & Participant Info */}
         <div className="py-6 flex flex-col sm:flex-row items-center gap-6">
-          {/* Photo Frame */}
+          {/* Photo Frame with loading and fallback error handling */}
           <div className="relative w-32 h-40 rounded-2xl overflow-hidden border-2 border-[#900C22] bg-slate-100 shadow-md shrink-0">
-            {delegate?.photo_storage_path || delegate?.photoPreviewUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={delegate.photoPreviewUrl || delegate.photo_storage_path}
-                alt={delegate.full_name}
-                className="w-full h-full object-cover"
-              />
+            {photoSrc && !imageError ? (
+              <>
+                {!imageLoaded && (
+                  <div className="absolute inset-0 bg-slate-200 animate-pulse flex items-center justify-center">
+                    <RefreshCw className="h-5 w-5 text-slate-400 animate-spin" />
+                  </div>
+                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photoSrc}
+                  alt={delegate.full_name}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    imageLoaded ? "opacity-100" : "opacity-0"
+                  }`}
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => setImageError(true)}
+                />
+              </>
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 text-xs">
+              <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-400 text-xs p-2 text-center">
                 <User className="h-10 w-10 mb-1 text-slate-400" />
-                <span>No Photo</span>
+                <span className="text-[11px] font-medium text-slate-500">Delegate</span>
               </div>
             )}
-            <div className="absolute bottom-0 inset-x-0 bg-[#900C22] py-0.5 text-center text-[9px] font-bold text-white">
+            <div className="absolute bottom-0 inset-x-0 bg-[#900C22] py-0.5 text-center text-[9px] font-bold text-white tracking-widest">
               DELEGATE
             </div>
           </div>
@@ -137,7 +152,7 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
 
             <div className="pt-2">
               <span className="inline-block rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
-                ₹500 PAID • VERIFIED
+                ₹{EVENT_DETAILS.registrationFee} PAID • VERIFIED
               </span>
             </div>
           </div>
@@ -150,7 +165,7 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
               Registration Number
             </span>
             <div className="text-2xl font-black font-mono text-[#900C22] tracking-widest">
-              {delegate?.registration_number || "TH26-XXXXXX"}
+              {delegate?.registration_number || "TH2026-XXXX"}
             </div>
             <p className="text-[10px] text-slate-500">
               Venue: {EVENT_DETAILS.location}
@@ -158,25 +173,28 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
           </div>
 
           {/* QR Code */}
-          {qrCodeUrl && (
-            <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-200 shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+          <div className="flex flex-col items-center shrink-0">
+            {qrCodeUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={qrCodeUrl}
-                alt="Verification QR Code"
-                className="w-20 h-20"
+                alt="Digital Pass QR Code"
+                className="w-24 h-24 rounded-xl border border-slate-300 bg-white p-1 shadow-sm"
               />
-            </div>
-          )}
+            ) : (
+              <div className="w-24 h-24 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-xs text-slate-400">
+                Loading QR...
+              </div>
+            )}
+            <span className="text-[9px] font-mono text-slate-400 mt-1">SCAN AT ENTRY GATE</span>
+          </div>
         </div>
 
-        {/* Security & Verification Footer */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-          <span className="flex items-center gap-1">
-            <ShieldCheck className="h-3 w-3 text-emerald-600" />
-            <span>Cryptographically Verified Pass</span>
-          </span>
-          <span>Birsa Munda Jayanti Committee</span>
+        {/* Footer Note */}
+        <div className="mt-4 pt-3 border-t border-slate-200 text-center">
+          <p className="text-[10px] text-slate-400">
+            Issued by {EVENT_DETAILS.organizer} • Birsa Munda Jayanti 2026
+          </p>
         </div>
       </div>
     </div>

@@ -66,7 +66,10 @@ export const step3CompetitionSchema = z.object({
 });
 
 export const step4PhotoSchema = z.object({
-  photoStoragePath: z.string().optional().or(z.literal("")),
+  photoStoragePath: z
+    .string({ required_error: "Photograph upload is strictly mandatory." })
+    .trim()
+    .min(1, "Profile photograph is strictly mandatory. Please upload a clear portrait photo before proceeding."),
   photoPreviewUrl: z.string().optional().or(z.literal("")),
 });
 
@@ -88,15 +91,15 @@ export const completeRegistrationSchema = step1BioDataSchema
 
 export type CompleteRegistrationInput = z.infer<typeof completeRegistrationSchema>;
 
-// Delegate login schema
+// Delegate login schema - Phone Number and Date of Birth
 export const delegateLoginSchema = z.object({
-  registrationNumber: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .regex(/^TH26-\d{6}$/, "Registration number must follow format TH26-XXXXXX"),
   mobileNumber: z
-    .string()
+    .string({ required_error: "Mobile number is required" })
     .trim()
-    .regex(indianMobileRegex, "Enter a valid 10-digit mobile number"),
+    .regex(indianMobileRegex, "Enter a valid 10-digit Indian mobile number"),
+  dateOfBirth: z
+    .string({ required_error: "Date of birth is required" })
+    .trim()
+    .refine((val) => !isNaN(Date.parse(val)), "Please enter a valid date of birth (YYYY-MM-DD)"),
 });
+
