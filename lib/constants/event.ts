@@ -23,7 +23,7 @@ export const EVENT_DETAILS = {
   email: "veerbirsamunda5@gmail.com",
   contact: {
     phone: "8917598855",
-    whatsapp: "8917598855",
+    whatsapp: "90787 07579",
     email: "veerbirsamunda5@gmail.com",
     operatingHours: "Monday to Saturday: 10:30 AM – 05:30 PM IST",
   },

@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { EVENT_DETAILS } from "@/lib/constants/event";
-import { ShieldCheck, Printer, Sparkles, User, RefreshCw } from "lucide-react";
+import { ShieldCheck, Printer, Sparkles, User, RefreshCw, CheckCircle2 } from "lucide-react";
 
 interface DigitalPassCardProps {
   delegate: any;
 }
+
+// Global flag: QR Code display for delegates is temporarily disabled as per secretariat instructions
+const SHOW_DELEGATE_QR_CODE = false;
 
 export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
@@ -17,6 +20,7 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
   const photoSrc = delegate?.photo_url || delegate?.photoPreviewUrl || delegate?.photo_storage_path;
 
   useEffect(() => {
+    if (!SHOW_DELEGATE_QR_CODE) return; // QR Code generation disabled
     if (!delegate?.registration_number) return;
 
     // Generate non-sensitive QR payload containing verification token
@@ -54,7 +58,7 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
             <span>Digital Audition Pass</span>
           </h3>
           <p className="text-xs text-slate-500">
-            Present this verifiable pass on your phone or as a printout at the audition venue in Rourkela.
+            Present this official delegate pass on your phone or as a printout at the audition venue in Rourkela.
           </p>
         </div>
 
@@ -158,7 +162,7 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
           </div>
         </div>
 
-        {/* Bottom Section: QR Code & Registration Number */}
+        {/* Bottom Section: Registration Number & Official Security Stamp (QR Code Disabled) */}
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center sm:text-left">
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
@@ -172,22 +176,42 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
             </p>
           </div>
 
-          {/* QR Code */}
-          <div className="flex flex-col items-center shrink-0">
-            {qrCodeUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={qrCodeUrl}
-                alt="Digital Pass QR Code"
-                className="w-24 h-24 rounded-xl border border-slate-300 bg-white p-1 shadow-sm"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-xs text-slate-400">
-                Loading QR...
+          {/* QR Code Section: Disabled for all delegates per secretariat instructions */}
+          {SHOW_DELEGATE_QR_CODE ? (
+            <div className="flex flex-col items-center shrink-0">
+              {qrCodeUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={qrCodeUrl}
+                  alt="Digital Pass QR Code"
+                  className="w-24 h-24 rounded-xl border border-slate-300 bg-white p-1 shadow-sm"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-xs text-slate-400">
+                  Loading QR...
+                </div>
+              )}
+              <span className="text-[9px] font-mono text-slate-400 mt-1">SCAN AT ENTRY GATE</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 rounded-2xl bg-white border border-rose-200 px-4 py-3 shadow-sm shrink-0">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 shrink-0">
+                <ShieldCheck className="h-6 w-6" />
               </div>
-            )}
-            <span className="text-[9px] font-mono text-slate-400 mt-1">SCAN AT ENTRY GATE</span>
-          </div>
+              <div className="text-left space-y-0.5">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                  Audition Status
+                </span>
+                <span className="text-xs font-black text-emerald-700 block flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  <span>CONFIRMED ENTRY</span>
+                </span>
+                <span className="text-[10px] text-slate-500 block">
+                  Admit via Registration Number
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Note */}

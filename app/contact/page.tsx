@@ -118,13 +118,13 @@ export default function ContactPage() {
                     8917598855
                   </a>
                   <a
-                    href="https://wa.me/918917598855"
+                    href={`https://wa.me/91${EVENT_DETAILS.contact.whatsapp.replace(/[^0-9]/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors mt-0.5"
                   >
                     <MessageSquare className="h-3.5 w-3.5 text-emerald-600" />
-                    <span>WhatsApp: 8917598855</span>
+                    <span>WhatsApp: {EVENT_DETAILS.contact.whatsapp}</span>
                   </a>
                 </div>
               </div>

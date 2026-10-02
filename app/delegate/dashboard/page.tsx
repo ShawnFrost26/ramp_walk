@@ -269,7 +269,7 @@ export default function DelegateDashboardPage() {
                   Digital Entry Pass Locked
                 </h3>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Your entry pass and verification QR code will be generated immediately once the registration fee of {formatCurrency(EVENT_DETAILS.registrationFee)} is confirmed.
+                  Your digital audition pass will be activated immediately once the registration fee of {formatCurrency(EVENT_DETAILS.registrationFee)} is confirmed.
                 </p>
               </div>
               <button
