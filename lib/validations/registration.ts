@@ -3,6 +3,13 @@ import { z } from "zod";
 const indianMobileRegex = /^[6-9]\d{9}$/;
 const pincodeRegex = /^\d{6}$/;
 
+function getAgeFromDate(dobString: string): number {
+  const dob = new Date(dobString);
+  const diffMs = Date.now() - dob.getTime();
+  const ageDt = new Date(diffMs);
+  return Math.abs(ageDt.getUTCFullYear() - 1970);
+}
+
 export const step1BioDataSchema = z.object({
   fullName: z
     .string()
@@ -18,7 +25,11 @@ export const step1BioDataSchema = z.object({
   dateOfBirth: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), "Invalid date of birth")
-    .refine((val) => new Date(val) < new Date(), "Date of birth must be in the past"),
+    .refine((val) => new Date(val) < new Date(), "Date of birth must be in the past")
+    .refine((val) => {
+      const age = getAgeFromDate(val);
+      return age >= 15 && age <= 35;
+    }, "Participant must be between 15 and 35 years of age to register for Ramp Walk"),
   gender: z.enum(["MALE", "FEMALE", "OTHER"], {
     errorMap: () => ({ message: "Please select a valid gender" }),
   }),
@@ -59,6 +70,11 @@ export const step2AddressContactSchema = z.object({
 export const step3CompetitionSchema = z.object({
   category: z.string().min(1, "Please select a competition category"),
   ageCategory: z.string().optional().or(z.literal("")),
+  ageEligibilityConfirmed: z.literal(true, {
+    errorMap: () => ({
+      message: "Please click and confirm the 15 – 35 Years Age Eligibility criteria to proceed",
+    }),
+  }),
   attireName: z.string().trim().max(150).optional().or(z.literal("")),
   attireRepresentation: z.string().trim().max(150).optional().or(z.literal("")),
   attireDescription: z.string().trim().max(500).optional().or(z.literal("")),

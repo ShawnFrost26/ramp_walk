@@ -39,10 +39,16 @@ export const COMPETITION_CATEGORIES = [
   { id: "traditional_duo", title: "Traditional Tribal Duo", gender: "ANY", subtitle: "Couple / Duo Traditional Presentation" },
 ] as const;
 
+export const AGE_LIMIT_CRITERIA = {
+  minAge: 15,
+  maxAge: 35,
+  label: "15 – 35 Years",
+  title: "Age Limit: 15 – 35 Years (Eligible Participant)",
+  description: "Official Ramp Walk participant age criterion. Participant must be between 15 and 35 years old.",
+} as const;
+
 export const AGE_CATEGORIES = [
-  { id: "junior", label: "Junior (14 – 17 Years)", minAge: 14, maxAge: 17 },
-  { id: "youth", label: "Youth / Main (18 – 28 Years)", minAge: 18, maxAge: 28 },
-  { id: "open", label: "Open Group (29+ Years)", minAge: 29, maxAge: 100 },
+  { id: "standard", label: "15 – 35 Years", minAge: 15, maxAge: 35 },
 ] as const;
 
 export const IDENTITY_PROOF_TYPES = [

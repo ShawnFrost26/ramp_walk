@@ -59,7 +59,8 @@ function RegistrationContent() {
     instagramHandle: "",
 
     category: matchedCategory?.title || COMPETITION_CATEGORIES[0].title,
-    ageCategory: "Youth / Main (18 – 28 Years)",
+    ageCategory: "15 – 35 Years",
+    ageEligibilityConfirmed: false,
     attireName: "",
     attireRepresentation: "",
     attireDescription: "",
@@ -166,7 +167,8 @@ function RegistrationContent() {
     if (currentStep === 3) {
       const res = step3CompetitionSchema.safeParse({
         category: formData.category,
-        ageCategory: formData.ageCategory,
+        ageCategory: formData.ageCategory || "15 – 35 Years",
+        ageEligibilityConfirmed: formData.ageEligibilityConfirmed,
         attireName: formData.attireName,
         attireRepresentation: formData.attireRepresentation,
         attireDescription: formData.attireDescription,

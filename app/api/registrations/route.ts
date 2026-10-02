@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
       instagram_handle: validData.instagramHandle || null,
 
       category: validData.category,
-      age_category: validData.ageCategory || null,
+      age_category: "15 – 35 Years",
 
       attire_name: validData.attireName || null,
       attire_representation: validData.attireRepresentation || null,

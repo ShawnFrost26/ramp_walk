@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Camera,
   Lock,
+  CheckCircle2,
 } from "lucide-react";
 
 interface Step5Props {
@@ -93,11 +94,14 @@ export function Step5Review({
           )}
 
           <div className="space-y-1 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs uppercase font-semibold text-[#900C22]">{formData.category}</span>
-              {formData.ageCategory && (
-                <span className="text-xs text-slate-500">• {formData.ageCategory}</span>
-              )}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs uppercase font-bold text-[#900C22] bg-rose-50 px-2.5 py-0.5 rounded border border-rose-200">
+                {formData.category}
+              </span>
+              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                <span>15 – 35 Years (Eligible)</span>
+              </span>
             </div>
             <h4 className="text-xl font-bold text-slate-900">{formData.fullName || "—"}</h4>
             <p className="text-xs text-slate-600">

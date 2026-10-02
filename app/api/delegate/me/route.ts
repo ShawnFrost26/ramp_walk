@@ -117,7 +117,7 @@ export async function GET(req: NextRequest) {
         mobile_number: session.mobileNumber || "9876543210",
         email: "birsa.participant@example.com",
         category: "Mr Rourkela 2026",
-        age_category: "Youth / Main (18 – 28 Years)",
+        age_category: "15 – 35 Years",
         attire_name: "Munda Tar-Gamcha & Silk Kurta",
         attire_representation: "Traditional Munda Warrior Attire",
         attire_description:

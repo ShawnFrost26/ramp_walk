@@ -28,6 +28,7 @@ export interface RegistrationFormData {
   // Step 3: Competition & Cultural Attire
   category: string;
   ageCategory?: string;
+  ageEligibilityConfirmed?: boolean;
   attireName?: string;
   attireRepresentation?: string;
   attireDescription?: string;

@@ -80,8 +80,16 @@ export function Step1BioData({ formData, updateFormData, errors }: Step1Props) {
               Date of Birth <span className="text-[#900C22]">*</span>
             </label>
             {calculatedAge !== null && (
-              <span className="text-xs font-medium text-[#900C22]">
-                Calculated Age: {calculatedAge} years
+              <span
+                className={`text-xs font-bold px-2 py-0.5 rounded-md ${
+                  calculatedAge >= 15 && calculatedAge <= 35
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                }`}
+              >
+                {calculatedAge >= 15 && calculatedAge <= 35
+                  ? `✓ Age: ${calculatedAge} years (Eligible: 15–35)`
+                  : `⚠ Age: ${calculatedAge} years (Outside 15–35 Criteria)`}
               </span>
             )}
           </div>
@@ -92,12 +100,15 @@ export function Step1BioData({ formData, updateFormData, errors }: Step1Props) {
               value={formData.dateOfBirth || ""}
               onChange={(e) => updateFormData({ dateOfBirth: e.target.value })}
               className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 transition-all ${
-                errors.dateOfBirth
+                errors.dateOfBirth || (calculatedAge !== null && (calculatedAge < 15 || calculatedAge > 35))
                   ? "border-red-500 focus:ring-red-500/20"
                   : "border-slate-300 focus:border-[#900C22] focus:ring-[#900C22]/20"
               }`}
             />
           </div>
+          <p className="text-[11px] text-slate-400">
+            Official Age Limit: <strong>15 to 35 Years</strong>. Age will be verified based on this date.
+          </p>
           {errors.dateOfBirth && <p className="text-xs text-red-500">{errors.dateOfBirth}</p>}
         </div>
 
