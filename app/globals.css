@@ -128,3 +128,52 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #900C22;
 }
+
+/* ==============================================================================
+   PRINT STYLES: Single-Page A4 Delegate Registration Slip Isolation
+   ============================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Completely suppress website navigation, footers, buttons, and dashboard clutter */
+  nav,
+  footer,
+  header,
+  button,
+  .no-print,
+  #dashboard-screen-content {
+    display: none !important;
+  }
+
+  /* Exclusively display the single-page A4 slip */
+  #printable-delegate-slip {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 16px 20px !important;
+    border: 2px solid #900C22 !important;
+    border-radius: 12px !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+

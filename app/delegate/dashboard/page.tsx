@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { DigitalPassCard } from "@/components/delegate/DigitalPassCard";
+import { DelegatePrintSlip } from "@/components/delegate/DelegatePrintSlip";
 import { EVENT_DETAILS } from "@/lib/constants/event";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import {
@@ -20,6 +21,7 @@ import {
   CheckCircle2,
   Calendar,
   Sparkles,
+  Printer,
 } from "lucide-react";
 
 export default function DelegateDashboardPage() {
@@ -82,8 +84,11 @@ export default function DelegateDashboardPage() {
     <div className="min-h-screen flex flex-col bg-white text-slate-800">
       <Navbar />
 
-      <main className="flex-1 py-8 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-6 sm:space-y-8 bg-grid-pattern">
+      <main className="flex-1 py-8 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full bg-grid-pattern">
         
+        {/* On-Screen Screen Layout (Strictly Hidden During Print) */}
+        <div id="dashboard-screen-content" className="space-y-6 sm:space-y-8 print:hidden">
+
         {/* PENDING PAYMENT NOTICE BANNER */}
         {isPending && (
           <div className="rounded-3xl border-2 border-amber-300 bg-amber-50/90 p-5 sm:p-7 shadow-lg space-y-4">
@@ -299,11 +304,23 @@ export default function DelegateDashboardPage() {
                   Submitted participant record for jury evaluation and secretariat files.
                 </p>
               </div>
-              {isPending && (
-                <span className="rounded-md bg-amber-100 border border-amber-300 px-2.5 py-1 text-xs font-bold text-amber-800">
-                  Status: Pending Payment
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {!isPending && (
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition-all cursor-pointer"
+                  >
+                    <Printer className="h-3.5 w-3.5 text-[#900C22]" />
+                    <span>Download A4 PDF</span>
+                  </button>
+                )}
+                {isPending && (
+                  <span className="rounded-md bg-amber-100 border border-amber-300 px-2.5 py-1 text-xs font-bold text-amber-800">
+                    Status: Pending Payment
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 text-xs">
@@ -385,15 +402,27 @@ export default function DelegateDashboardPage() {
                 </h3>
                 <p className="text-xs text-slate-500">Official proof of registration payment</p>
               </div>
-              {isPending ? (
-                <span className="rounded-full bg-amber-100 border border-amber-300 px-3 py-1 text-xs font-bold text-amber-800">
-                  PAYMENT PENDING
-                </span>
-              ) : (
-                <span className="rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
-                  PAID & VERIFIED
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {!isPending && (
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition-all cursor-pointer"
+                  >
+                    <Printer className="h-3.5 w-3.5 text-[#900C22]" />
+                    <span>Download A4 Receipt</span>
+                  </button>
+                )}
+                {isPending ? (
+                  <span className="rounded-full bg-amber-100 border border-amber-300 px-3 py-1 text-xs font-bold text-amber-800">
+                    PAYMENT PENDING
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
+                    PAID & VERIFIED
+                  </span>
+                )}
+              </div>
             </div>
 
             {isPending ? (
@@ -450,6 +479,15 @@ export default function DelegateDashboardPage() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        </div>
+
+        {/* Dedicated Print-Only Single-Page A4 Registration Slip & Pass */}
+        {!isPending && delegate && (
+          <div className="hidden print:block w-full">
+            <DelegatePrintSlip delegate={delegate} />
           </div>
         )}
 

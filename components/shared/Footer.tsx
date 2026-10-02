@@ -3,7 +3,7 @@ import { EVENT_DETAILS } from "@/lib/constants/event";
 
 export function Footer() {
   return (
-    <footer className="w-full bg-[#900C22] text-white py-4 sm:py-6 border-t border-[#74091A]">
+    <footer className="w-full bg-[#900C22] text-white py-4 sm:py-6 border-t border-[#74091A] print:hidden no-print">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 text-center space-y-2.5">
         {/* Navigation links matching the screenshot */}
         <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-1.5 text-[11px] sm:text-sm font-semibold text-white/95">

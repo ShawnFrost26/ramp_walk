@@ -65,17 +65,17 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
         <button
           type="button"
           onClick={handlePrint}
-          className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold bg-[#900C22] hover:bg-[#74091A] text-white shadow-md transition-all cursor-pointer"
+          className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold bg-[#900C22] hover:bg-[#74091A] text-white shadow-md transition-all cursor-pointer print:hidden"
         >
           <Printer className="h-4 w-4" />
-          <span>Print / Save Pass (PDF)</span>
+          <span>Download Official A4 Slip (PDF)</span>
         </button>
       </div>
 
-      {/* Printable Pass Container */}
+      {/* On-Screen Pass Preview (Hidden During Print) */}
       <div
-        id="printable-pass"
-        className="relative mx-auto max-w-lg rounded-3xl border-2 border-[#900C22] bg-white p-6 sm:p-8 shadow-xl overflow-hidden print:border-black print:text-black print:bg-white"
+        id="on-screen-pass"
+        className="relative mx-auto max-w-lg rounded-3xl border-2 border-[#900C22] bg-white p-6 sm:p-8 shadow-xl overflow-hidden print:hidden"
       >
         {/* Decorative Top Accent Banner */}
         <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-[#900C22] via-[#B81D39] to-[#A26715]" />
