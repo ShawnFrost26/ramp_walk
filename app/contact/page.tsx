@@ -40,39 +40,70 @@ export default function ContactPage() {
               Official Secretariat
             </h3>
 
-            <div className="space-y-4 text-xs sm:text-sm text-slate-700">
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-[#900C22] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-slate-900 block">Event Venue & Address</strong>
-                  <p className="text-slate-500 text-xs mt-0.5">
-                    Birsa Munda Cultural Ground, Near Birsa Munda Stadium, Panposh Road, Rourkela, Sundargarh, Odisha - 769004
+            <div className="space-y-5 text-xs sm:text-sm text-slate-700">
+              {/* Event Venue & Address */}
+              <div className="flex items-start gap-3.5 group">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-[#900C22] border border-rose-100 shadow-sm shrink-0">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <strong className="text-slate-900 block font-bold text-sm">Event Venue & Address</strong>
+                  <p className="text-slate-800 text-xs font-semibold">Sector-13, Ground</p>
+                  <p className="text-slate-500 text-xs">Rourkela, Near airport</p>
+                </div>
+              </div>
+
+              {/* Helpline Numbers & WhatsApp */}
+              <div className="flex items-start gap-3.5 group">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-[#A26715] border border-amber-100 shadow-sm shrink-0">
+                  <Phone className="h-5 w-5" />
+                </div>
+                <div className="space-y-1">
+                  <strong className="text-slate-900 block font-bold text-sm">Helpline Numbers</strong>
+                  <a
+                    href="tel:8917598855"
+                    className="text-slate-800 hover:text-[#900C22] text-xs font-semibold block transition-colors"
+                  >
+                    8917598855
+                  </a>
+                  <a
+                    href="https://wa.me/918917598855"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors mt-0.5"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>WhatsApp: 8917598855</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Email Inquiries */}
+              <div className="flex items-start gap-3.5 group">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-[#900C22] border border-rose-100 shadow-sm shrink-0">
+                  <Mail className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <strong className="text-slate-900 block font-bold text-sm">Email Inquiries</strong>
+                  <a
+                    href="mailto:veerbirsamunda5@gmail.com"
+                    className="text-[#900C22] font-semibold text-xs hover:underline block break-all"
+                  >
+                    veerbirsamunda5@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              {/* Operating Hours */}
+              <div className="flex items-start gap-3.5 group">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200 shadow-sm shrink-0">
+                  <Clock className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <strong className="text-slate-900 block font-bold text-sm">Operating Hours</strong>
+                  <p className="text-slate-700 text-xs font-semibold">
+                    Monday to Saturday: 10:30 AM – 05:30 PM IST
                   </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-[#900C22] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-slate-900 block">Helpline Numbers</strong>
-                  <p className="text-slate-600 text-xs mt-0.5">{EVENT_DETAILS.contact.phone}</p>
-                  <p className="text-slate-600 text-xs">WhatsApp: {EVENT_DETAILS.contact.whatsapp}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-[#900C22] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-slate-900 block">Email Inquiries</strong>
-                  <p className="text-[#900C22] font-semibold text-xs mt-0.5">{EVENT_DETAILS.contact.email}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-[#900C22] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-slate-900 block">Operating Hours</strong>
-                  <p className="text-slate-500 text-xs mt-0.5">Monday to Saturday: 09:30 AM - 06:30 PM IST</p>
                   <p className="text-slate-400 text-[11px]">Closed on National Holidays</p>
                 </div>
               </div>
