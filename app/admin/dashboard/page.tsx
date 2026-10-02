@@ -21,6 +21,7 @@ import {
   X,
   Activity,
 } from "lucide-react";
+import { InspectDelegateModal } from "@/components/admin/InspectDelegateModal";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -468,75 +469,16 @@ export default function AdminDashboardPage() {
 
       </main>
 
-      {/* INSPECT PARTICIPANT MODAL */}
+      {/* INSPECT PARTICIPANT MODAL (Full View & Admin Edit) */}
       {inspectRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-              <div>
-                <span className="text-[10px] font-mono text-[#900C22] uppercase tracking-widest font-bold">
-                  {inspectRecord.registration_number || "Draft Entry"}
-                </span>
-                <h3 className="text-xl font-bold text-slate-900">{inspectRecord.full_name}</h3>
-              </div>
-              <button
-                onClick={() => setInspectRecord(null)}
-                className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:text-slate-800"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div>
-                <span className="text-slate-400 font-medium">Category:</span>
-                <p className="font-semibold text-[#900C22] mt-0.5">{inspectRecord.category}</p>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium">Status:</span>
-                <p className="font-semibold text-emerald-700 mt-0.5">{inspectRecord.registration_status}</p>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium">Contact:</span>
-                <p className="text-slate-800 mt-0.5">{inspectRecord.mobile_number}</p>
-                <p className="text-slate-500 truncate">{inspectRecord.email}</p>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium">Guardian & Community:</span>
-                <p className="text-slate-800 mt-0.5">{inspectRecord.guardian_name}</p>
-                <p className="text-[#900C22] font-semibold">{inspectRecord.tribal_community || "Tribal"}</p>
-              </div>
-              <div className="col-span-2">
-                <span className="text-slate-400 font-medium">Full Address:</span>
-                <p className="text-slate-700 mt-0.5">{inspectRecord.full_address}</p>
-                <p className="text-slate-500">
-                  {inspectRecord.city_or_village}, {inspectRecord.district}, {inspectRecord.state} - {inspectRecord.pincode}
-                </p>
-              </div>
-              {(inspectRecord.attire_name || inspectRecord.attire_representation) && (
-                <div className="col-span-2 border-t border-slate-100 pt-3">
-                  <span className="text-slate-400 font-medium">Traditional Attire:</span>
-                  <p className="font-semibold text-slate-900 mt-0.5">
-                    {inspectRecord.attire_name} ({inspectRecord.attire_representation})
-                  </p>
-                  {inspectRecord.attire_description && (
-                    <p className="text-slate-500 text-[11px] mt-1 italic">&ldquo;{inspectRecord.attire_description}&rdquo;</p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-slate-200 pt-4 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setInspectRecord(null)}
-                className="rounded-xl border border-slate-300 bg-slate-100 px-5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <InspectDelegateModal
+          record={inspectRecord}
+          onClose={() => setInspectRecord(null)}
+          onRecordUpdated={(updated) => {
+            setRegistrations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+            fetchMetrics();
+          }}
+        />
       )}
 
       <Footer />
