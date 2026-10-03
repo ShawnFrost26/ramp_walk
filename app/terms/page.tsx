@@ -36,7 +36,10 @@ export default function TermsPage() {
               The <strong>Dharti Aaba Veer Birsa Munda Jayanti 2026 Ramp Walk Competition</strong> (including the Miss & Mr Rourkela 2026 Auditions) is an indigenous cultural modeling and heritage showcase organized by the <strong>Dharti Aaba Veer Birsa Munda Jayanti Committee 2026</strong> in Rourkela, Sundargarh, Odisha.
             </p>
             <p>
-              Participation is open to eligible individuals who register through this official portal. By submitting a registration and paying the requisite fee, the participant agrees to abide strictly by these Terms and Conditions.
+              Participation is exclusively open to delegates belonging to indigenous tribal (Adivasi) communities, welcoming participants from every state and corner of India. Delegates are encouraged to proudly represent and showcase the authentic attire, customs, traditional jewelry, and heritage of their respective tribal culture on the runway.
+            </p>
+            <p>
+              By submitting a registration through this official portal and paying the requisite fee, each participant affirms their eligibility and agrees to abide strictly by these Terms and Conditions.
             </p>
           </section>
 
