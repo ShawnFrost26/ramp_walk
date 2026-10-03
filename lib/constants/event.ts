@@ -19,7 +19,7 @@ export const EVENT_DETAILS = {
     city: "Rourkela",
     landmark: "Near airport",
   },
-  organizer: "Dharti Aaba Birsa Munda Jayanti Committee",
+  organizer: "Dharti Aaba Veer Birsa Munda Jayanti Committee 2026",
   email: "veerbirsamunda5@gmail.com",
   contact: {
     phone: "8917598855",

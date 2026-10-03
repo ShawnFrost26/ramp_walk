@@ -33,7 +33,7 @@ export default function TermsPage() {
               <span className="text-[#900C22] font-mono">1.</span> Introduction & Eligibility
             </h2>
             <p>
-              The <strong>Dharti Aaba Veer Birsa Munda Jayanti 2026 Ramp Walk Competition</strong> (including the Miss & Mr Rourkela 2026 Auditions) is an indigenous cultural modeling and heritage showcase organized by the Birsa Munda Jayanti Committee in Rourkela, Sundargarh, Odisha.
+              The <strong>Dharti Aaba Veer Birsa Munda Jayanti 2026 Ramp Walk Competition</strong> (including the Miss & Mr Rourkela 2026 Auditions) is an indigenous cultural modeling and heritage showcase organized by the <strong>Dharti Aaba Veer Birsa Munda Jayanti Committee 2026</strong> in Rourkela, Sundargarh, Odisha.
             </p>
             <p>
               Participation is open to eligible individuals who register through this official portal. By submitting a registration and paying the requisite fee, the participant agrees to abide strictly by these Terms and Conditions.
