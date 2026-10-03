@@ -16,6 +16,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { EVENT_DETAILS } from "@/lib/constants/event";
+import { TribalBorder } from "@/components/shared/TribalBorder";
 
 export function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -114,6 +115,9 @@ export function Navbar() {
             </button>
           </div>
         </div>
+
+        {/* Traditional Adivasi Dance Border Motif */}
+        <TribalBorder variant="header" />
       </header>
 
       {/* MOBILE APP DRAWER OVERLAY */}
@@ -154,6 +158,9 @@ export function Navbar() {
                 <X className="h-4 w-4" />
               </button>
             </div>
+
+            {/* Tribal Border below Drawer Header */}
+            <TribalBorder variant="standalone" />
 
             {/* Drawer Navigation Links */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
