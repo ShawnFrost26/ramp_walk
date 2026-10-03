@@ -50,9 +50,17 @@ export function DelegatePrintSlip({ delegate }: DelegatePrintSlipProps) {
           </div>
         </div>
 
-        <h1 className="text-xl sm:text-2xl font-black text-[#900C22] uppercase tracking-tight pt-1">
-          Dharti Aaba Veer Birsa Munda Jayanti 2026
-        </h1>
+        <div className="flex items-center justify-center gap-3 pt-1">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/tribal-logo.png"
+            alt="Tribal Heritage"
+            className="h-10 w-10 object-contain rounded-full"
+          />
+          <h1 className="text-xl sm:text-2xl font-black text-[#900C22] uppercase tracking-tight">
+            Dharti Aaba Veer Birsa Munda Jayanti 2026
+          </h1>
+        </div>
         <p className="text-xs font-bold text-[#A26715] tracking-wide uppercase">
           State-Level Ramp Walk Competition • Official Delegate Entry Slip
         </p>

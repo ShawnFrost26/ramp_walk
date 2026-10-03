@@ -43,9 +43,14 @@ export function Navbar() {
       <header className="sticky top-0 z-40 w-full bg-[#900C22] text-white shadow-md border-b border-[#74091A] print:hidden no-print">
         <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
           {/* Brand / Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-400 via-rose-300 to-indigo-400 text-slate-900 font-black shadow group-hover:scale-105 transition-transform text-sm sm:text-base">
-              🏹
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center shrink-0 rounded-full bg-amber-400/15 p-0.5 ring-1 ring-amber-400/30 shadow-sm group-hover:scale-105 transition-transform">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/tribal-logo.png"
+                alt="Tribal Heritage Bow and Arrow"
+                className="h-full w-full object-contain rounded-full drop-shadow-sm"
+              />
             </div>
             <div className="flex flex-col">
               <span className="text-sm sm:text-lg font-black tracking-wider text-white uppercase font-sans">
@@ -125,9 +130,14 @@ export function Navbar() {
           <div className="relative w-4/5 max-w-xs h-full bg-white text-slate-800 shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
             {/* Drawer Header */}
             <div className="p-4 bg-[#900C22] text-white flex items-center justify-between border-b border-[#74091A]">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 text-slate-900 font-bold text-xs">
-                  🏹
+              <div className="flex items-center gap-2.5">
+                <div className="relative flex h-7 w-7 items-center justify-center shrink-0 rounded-full bg-amber-400/20 p-0.5 ring-1 ring-amber-400/40">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/images/tribal-logo.png"
+                    alt="Tribal Heritage Bow and Arrow"
+                    className="h-full w-full object-contain rounded-full"
+                  />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs font-black uppercase tracking-wider">Tribal Heritage</span>

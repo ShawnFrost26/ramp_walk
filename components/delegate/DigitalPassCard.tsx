@@ -81,9 +81,17 @@ export function DigitalPassCard({ delegate }: DigitalPassCardProps) {
         <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-[#900C22] via-[#B81D39] to-[#A26715]" />
 
         {/* Pass Header */}
-        <div className="text-center space-y-1.5 border-b border-rose-100 pb-5 pt-2">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FCECEF] border border-[#F8B4C0] px-3 py-0.5 text-[10px] font-bold text-[#900C22] uppercase tracking-widest">
-            Official Audition Pass
+        <div className="text-center space-y-2 border-b border-rose-100 pb-5 pt-2">
+          <div className="flex items-center justify-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/tribal-logo.png"
+              alt="Tribal Heritage Logo"
+              className="h-9 w-9 object-contain rounded-full shadow-xs"
+            />
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FCECEF] border border-[#F8B4C0] px-3 py-0.5 text-[10px] font-bold text-[#900C22] uppercase tracking-widest">
+              Official Audition Pass
+            </div>
           </div>
           <h2 className="text-lg sm:text-xl font-black text-[#900C22] tracking-tight uppercase">
             Dharti Aaba Birsa Jayanti 2026
